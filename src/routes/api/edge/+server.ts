@@ -4,8 +4,6 @@ import type { RequestHandler } from './$types';
 import { neon } from '@neondatabase/serverless';
 import { drizzle } from 'drizzle-orm/neon-http';
 
-export const config = { runtime: 'edge' };
-
 export const POST: RequestHandler = async ({ request }) => {
   const auth = request.headers.get('authorization');
   if (auth !== `Bearer ${process.env.ADMIN_SECRET}`) {
