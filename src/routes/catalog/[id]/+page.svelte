@@ -4,6 +4,7 @@
 	import Header from '$lib/components/Header/Header.svelte';
 	import type { ProductSizesInfo } from '$lib/server/types/Dto';
 	import ImageGalery from '$lib/components/ImageGalery/ImageGalery.svelte';
+	import { cart } from '$lib/stores/store';
 
 	let { data }: PageProps = $props();
 
@@ -19,6 +20,19 @@
 		}	
 		return data.product.sizes[size_index]
 	});
+
+	function addDress(){
+		console.log('addItem')
+		cart.addItem({
+			id: data.product.id,
+			name: data.product.name,
+			color: data.product.color,
+			price: current_size.price,
+			available_quantity: current_size.available_quantity,
+			size_id: current_size.size_id,
+			size: current_size.size,
+		});
+	}
 </script>
 
 <Header />
@@ -75,11 +89,10 @@
 				</div>
 			</div>
 
-			<!-- Interaction Buttons -->
 			<div class="mt-4 flex gap-4">
-				<!-- <button class="from-primary to-primary-container text-on-primary font-manrope h-16 flex-1 rounded-full bg-linear-to-r text-lg font-bold shadow-xl transition-all hover:opacity-90 active:scale-95"> -->
 				<button class="text-white font-manrope h-16 flex-1 rounded-full text-lg font-bold shadow-xl transition-all hover:opacity-90 active:scale-95 flex items-center gap-4 justify-center"
-						style="background: linear-gradient(to right, #735c00, #d4af37);">
+						style="background: linear-gradient(to right, #735c00, #d4af37);"
+						onclick={()=>{ addDress(); }}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart flex"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
 					<span>Add to Cart</span>  
 				</button>

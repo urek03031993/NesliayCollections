@@ -1,18 +1,20 @@
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/index.js';
+import { isValidPass } from '$lib/utils/utils.js';
 
 
 export async function POST({ request, cookies }) {
 	try {
-		const { username, password } = await request.json();
-		
+		const { username, password }: { username: string, password: string }  = await request.json();		
 
-		const user_data = await db.query.user.findFirst({
+		const userData = await db.query.user.findFirst({
 			where: (users, { eq }) => eq(users.username, username)
 		});
 
-		if (user_data && password === '123') {
-			cookies.set('session', 'admin-token', {
+		const validPass = isValidPass(password, userData?.password ?? '')
+
+		if (userData && validPass) {
+			cookies.set('session', userData.username, {
 				httpOnly: true,
 				secure: false,
 				sameSite: 'strict',
@@ -20,7 +22,7 @@ export async function POST({ request, cookies }) {
 				maxAge: 60 * 60 * 8,
 			});
 
-			return json({ user_data	}, {status: 200} );
+			return json({ userData	}, {status: 200} );
 		}
 		
 		return json('Invalid credentials' , { status: 401 });

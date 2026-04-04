@@ -17,7 +17,8 @@
 
 <header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-xl shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
     <nav class="flex justify-between items-center w-full px-8 py-4 max-w-screen-2xl mx-auto">
-        <div class="font-notoSerif italic text-2xl text-primary">Neliay Collection</div>
+        <div class="font-notoSerif italic text-2xl text-primary">
+            <a href={ resolve('/') }>Neliay Collection</a>  </div>
 
         <div class="hidden md:flex gap-10 items-center">
             <NavLink href={ resolve('/') } text='Home'/>
@@ -39,9 +40,9 @@
 
             <AdminDropdown/>                   
             
-            <button class="md:hidden text-on-surface-variant">
+            <!-- <button class="md:hidden text-on-surface-variant">
                 <span class="material-symbols-outlined">menu</span>
-            </button>
+            </button> -->
             
         </div>
 

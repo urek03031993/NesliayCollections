@@ -40,3 +40,22 @@ export interface ProductForm2 {
     productForm: ProductForm1;
     sizes: Size[];
 }
+
+
+
+export interface ShoppingCarProduct {
+    id: number;
+    name: string;
+    color: string; 
+    price: number;
+    available_quantity: number; 
+    size_id: number;
+    size: string;
+
+}
+
+
+export interface ShoppingCarItem {
+    product: ShoppingCarProduct;
+    quantity: number; 
+}

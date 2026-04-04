@@ -1,23 +1,8 @@
 import type { Actions } from "./$types";
 import { error, fail } from "@sveltejs/kit";
 
-// import type { PageServerLoad } from "./$types";
-
-// export const load: PageServerLoad = async({ url, cookies, fetch }) => {
-
-//     const response = await fetch('/api/auth/login');
-
-//     const json = await response.json()
-
-//     console.log('front', json)
-
-
-//     return { success: true }   
-// };
-
-
 export const actions = {
-    login: async ({ request, cookies, fetch }) => {
+    default: async ({ request, cookies, fetch }) => {
         const data = await request.formData();
 
         const username = data.get('username')
@@ -33,7 +18,7 @@ export const actions = {
             })
         });        
         
-        const json = await response.json()
+        const json = await response.json();
 
         if (!response.ok){
             if (response.status === 500 && response.statusText === 'BackendOffline'){
@@ -43,7 +28,7 @@ export const actions = {
             return fail(response.status, json);  
         } 
         
-        cookies.set('session', 'admin-nesliay', {
+        cookies.set('session', 'admin-neliay', {
             httpOnly: true,
             secure: false,
             sameSite: 'strict',
