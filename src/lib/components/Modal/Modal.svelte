@@ -15,7 +15,7 @@
 <Dialog bind:open>
 
 	{#if title}				
-		<div class="flex items-center p-4 md:p-5 justify-between rounded-t-lg shrink-0 text-xl font-bold text-gray-900 dark:text-white uppercase">
+		<div class="flex items-center p-4 md:p-5 justify-between rounded-t-lg shrink-0 text-xl font-bold text-primary uppercase">
 			<h3>{title}</h3>			
 		</div>
 	{/if}	

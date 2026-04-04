@@ -1,12 +1,17 @@
 <script lang="ts">
 	import Header from '$lib/components/Header/Header.svelte';
-	import Footer from '$lib/components/Footer/Footer.svelte';
+	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';
+	import { cart } from '$lib/stores/store';
+	import { onMount } from 'svelte';
+
+	onMount(()=>{
+		cart.loadStoredItems();
+	});
 </script>
 
 <Header />
 
 <main class="mx-auto w-full max-w-7xl grow px-6 pt-32 pb-24 md:px-12">
-	<!-- Page Title -->
 	<div class="mb-12">
 		<h1 class="font-notoSerif text-primary mb-4 text-5xl tracking-tight md:text-6xl">
 			Your Selection
@@ -15,22 +20,25 @@
 			Curating your bespoke journey
 		</p>
 	</div>
-	<!-- Checkout Layout: Asymmetric Bento Style -->
+
 	<div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
-		<!-- Cart Items List (Column 1-7) -->
 		<div class="space-y-8 lg:col-span-7">
+			{#each $cart as item(item.product.id)}
+				<CartProductCard cartItem = { item }/>
+			{/each}
+
+
+
 			<!-- Item 1 -->
-			<div
-				class="group bg-surface-container-lowest flex flex-col gap-8 rounded-3xl p-6 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(28,28,24,0.06)] md:flex-row"
-			>
+			<div class="group bg-surface-container-lowest flex flex-col gap-8 rounded-3xl p-6 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(28,28,24,0.06)] md:flex-row">
 				<div class="bg-surface-container aspect-4/5 w-full overflow-hidden rounded-2xl md:w-48">
-					<img
-						class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-						alt=""
-						data-alt="Ethereal silk evening gown in champagne"
-						src="https://lh3.googleusercontent.com/aida-public/AB6AXuDExP0KhjptA0Yi9Oz1Wms8lH6GcPGf5XYtMFqfaUoCyY3o2_eUmfd51Dv124cXLsRUDbC8zV877eVPmWkvsWSdP0t9ZEgHIs7qwPBZjul-1Du-dXqmehGZolitEz13wR6f91g2XxMiNlzjcKxLXHHHRFPCXsJfgn_NqqAWZxSQx6cKoAZeA6D5rNnLlR96yzB5OWWJOawUWV4EdkwCNhPQIGVUXDYlgjcT0dlg5JxRRKo2HBZ7ZAAN3r_SL5ryhn6NRTCsu2rhsMRt"
+					<img class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+							alt=""
+							data-alt="Ethereal silk evening gown in champagne"
+							src="https://lh3.googleusercontent.com/aida-public/AB6AXuDExP0KhjptA0Yi9Oz1Wms8lH6GcPGf5XYtMFqfaUoCyY3o2_eUmfd51Dv124cXLsRUDbC8zV877eVPmWkvsWSdP0t9ZEgHIs7qwPBZjul-1Du-dXqmehGZolitEz13wR6f91g2XxMiNlzjcKxLXHHHRFPCXsJfgn_NqqAWZxSQx6cKoAZeA6D5rNnLlR96yzB5OWWJOawUWV4EdkwCNhPQIGVUXDYlgjcT0dlg5JxRRKo2HBZ7ZAAN3r_SL5ryhn6NRTCsu2rhsMRt"
 					/>
 				</div>
+
 				<div class="flex grow flex-col justify-between py-2">
 					<div class="flex items-start justify-between">
 						<div>
@@ -72,6 +80,7 @@
 					</div>
 				</div>
 			</div>
+
 			<!-- Item 2 -->
 			<div
 				class="group bg-surface-container-lowest flex flex-col gap-8 rounded-3xl p-6 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(28,28,24,0.06)] md:flex-row"
@@ -229,40 +238,5 @@
 		</a>
 	</div>
 </main>
-<!-- Footer -->
 
-<Footer />
 
-<!-- Bottom Nav for Mobile -->
-<div
-	class="bg-surface/90 fixed bottom-0 left-0 z-50 flex w-full items-center justify-around rounded-t-3xl px-4 pt-3 pb-6 shadow-[0_-8px_32px_rgba(28,28,24,0.06)] backdrop-blur-lg md:hidden dark:bg-zinc-950/90"
->
-	<button
-		class="text-on-surface-variant flex flex-col items-center justify-center opacity-70 dark:text-zinc-500"
-	>
-		<span class="material-symbols-outlined">home</span>
-		<span class="font-manrope mt-1 text-[10px] font-medium tracking-widest uppercase">Home</span>
-	</button>
-	<button
-		class="text-on-surface-variant flex flex-col items-center justify-center opacity-70 dark:text-zinc-500"
-	>
-		<span class="material-symbols-outlined">auto_awesome</span>
-		<span class="font-manrope mt-1 text-[10px] font-medium tracking-widest uppercase">Catalog</span>
-	</button>
-	<button
-		class="text-on-surface-variant flex flex-col items-center justify-center opacity-70 dark:text-zinc-500"
-	>
-		<span class="material-symbols-outlined">favorite</span>
-		<span class="font-manrope mt-1 text-[10px] font-medium tracking-widest uppercase"
-			>Favorites</span
-		>
-	</button>
-	<button
-		class="bg-primary-container/20 dark:bg-primary/10 text-primary dark:text-primary-container flex flex-col items-center justify-center rounded-full px-4 py-2"
-	>
-		<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;"
-			>shopping_basket</span
-		>
-		<span class="font-manrope mt-1 text-[10px] font-medium tracking-widest uppercase">Cart</span>
-	</button>
-</div>

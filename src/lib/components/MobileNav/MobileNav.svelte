@@ -14,11 +14,11 @@
     <!-- <a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70" href="#">
         <span class="material-symbols-outlined">favorite</span>
         <span class="font-manrope text-[10px] font-medium tracking-widest uppercase">Favorites</span>
-    </a>
-    <a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70" href="#">
+    </a> -->
+    <a class="flex flex-col items-center justify-center text-on-surface-variant opacity-70" href={resolve('/checkout')}>
         <span class="material-symbols-outlined">shopping_basket</span>
         <span class="font-manrope text-[10px] font-medium tracking-widest uppercase">Cart</span>
-    </a> -->
+    </a>
 </nav>
 
 <!-- Mobile Bottom Navigation Bar -->

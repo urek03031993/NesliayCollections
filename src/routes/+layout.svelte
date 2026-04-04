@@ -2,6 +2,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Footer from '$lib/components/Footer/Footer.svelte';
+	import MobileNav from '$lib/components/MobileNav/MobileNav.svelte';
 
 	let { children } = $props();	
 </script>
@@ -13,5 +14,6 @@
 {@render children()}
 
 <Footer />
+<MobileNav />
 
 
