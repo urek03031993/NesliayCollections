@@ -9,7 +9,7 @@ export const actions = {
     default: async ({ request, fetch }) => {
         const formData = await request.formData();
 
-        const body: Partial<SizeDto> = buildRequestBody(formData);
+        const body = buildRequestBody(formData);
 
         const response = await fetch(resolve('/api/size'), {
             method: 'POST',
@@ -23,7 +23,7 @@ export const actions = {
         if( !response.ok ){
             return fail(400, {
                 errors: jsonResponse as string,  
-                data: body
+                data: body as Partial<SizeDto>
             });           
         };          
 

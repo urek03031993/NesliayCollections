@@ -42,7 +42,6 @@ export interface ProductForm2 {
 }
 
 
-
 export interface ShoppingCarProduct {
     id: number;
     name: string;
@@ -51,11 +50,20 @@ export interface ShoppingCarProduct {
     available_quantity: number; 
     size_id: number;
     size: string;
-
+    url: string;
+    shortDescription: string; 
 }
 
 
 export interface ShoppingCarItem {
     product: ShoppingCarProduct;
     quantity: number; 
+}
+
+
+export interface ShoppingCarItemImages {
+    id: number, 
+    url: string, 
+    product_id: number, 
+    short_description: string
 }

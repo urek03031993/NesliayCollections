@@ -57,7 +57,9 @@
                 </div>
                 <a class="text-primary font-bold flex items-center gap-2 group" href={resolve('/catalog')}>
                     Explore Full Boutique 
-                    <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">trending_flat</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-right-icon lucide-move-right group-hover:translate-x-1 transition-transform">
+                        <path d="M18 8L22 12L18 16"/><path d="M2 12H22"/>
+                    </svg>                    
                 </a>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
@@ -73,11 +75,11 @@
                             <span class="bg-tertiary text-on-tertiary px-4 py-1 rounded-full text-xs font-bold uppercase">Must Have</span>
                         </div>
                     </div>
-                    <div class="space-y-1">
+                    <!-- <div class="space-y-1">
                         <h4 class="font-notoSerif text-xl text-on-background">Ballgown for Kids</h4>
                         <p class="text-on-surface-variant text-sm font-medium">Layered Silk &amp; Tulle</p>
                         <p class="text-primary font-bold text-lg pt-2">$189.00</p>
-                    </div>
+                    </div> -->
                 </div>
                 
                 <div class="space-y-6 group mt-12 md:mt-24">
@@ -91,11 +93,11 @@
                             <span class="bg-primary text-on-primary px-4 py-1 rounded-full text-xs font-bold uppercase">Bespoke</span>
                         </div>
                     </div>
-                    <div class="space-y-1">
+                    <!-- <div class="space-y-1">
                         <h4 class="font-notoSerif text-xl text-on-background">Gentleman's Suit</h4>
                         <p class="text-on-surface-variant text-sm font-medium">Italian Wool Blend</p>
                         <p class="text-primary font-bold text-lg pt-2">$245.00</p>
-                    </div>
+                    </div> -->
                 </div>
                 
                 <div class="space-y-6 group">
@@ -111,11 +113,11 @@
                             </div>
                         </div>
                     </div>
-                    <div class="space-y-1">
+                    <!-- <div class="space-y-1">
                         <h4 class="font-notoSerif text-xl text-on-background">Frozen Inspired Outfit</h4>
                         <p class="text-on-surface-variant text-sm font-medium">Ice Blue Sequins</p>
                         <p class="text-primary font-bold text-lg pt-2">$155.00</p>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -132,11 +134,6 @@
 
     .font-bold {
         font-weight: 700;
-    }
-
-    .text-lg {
-        font-size: 1.125rem;
-        line-height: 1.75rem;
     }
 
     .font-manrope {

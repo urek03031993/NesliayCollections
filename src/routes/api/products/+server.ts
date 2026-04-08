@@ -37,6 +37,7 @@ export const GET: RequestHandler = async () => {
 	}
 }
 
+
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		if (!cookies.get('session')) {
