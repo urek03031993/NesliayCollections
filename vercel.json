@@ -2,5 +2,5 @@
   "buildCommand": "pnpm run build",
   "installCommand": "pnpm add",
   "framework": "sveltekit",
-  "regions": ["aws-us-east-2"]
+  "regions": ["iad1"]
 }
