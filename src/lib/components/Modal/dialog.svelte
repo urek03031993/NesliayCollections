@@ -11,13 +11,11 @@
 		open = $bindable(false), 
 		children, 
 		onaction = () => true, 
-		...RestProps
 	}: DialogProps = $props();
 
 	const transitionParams = { duration: 100, easing: sineIn };
 
 	let modal = $state(true)
-	let form = $state(true)
 	let outsideclose = $state(true)
 	let permanent = false
 	let autoclose = false
@@ -117,14 +115,6 @@
 
 	let ref: HTMLDialogElement | undefined = $state(undefined);
 
-    function close_handler() {
-		if (form) {
-		// dialog/form mechanism will close the dialog
-		return;
-		}
-
-		ref?.dispatchEvent(new Event("cancel", { bubbles: true, cancelable: true }));
-	}	
 
 </script>
 
@@ -138,7 +128,7 @@
 		onclick={_onclick}
 		ontoggle={_ontoggle}
 		transition:fade|global={transitionParams as FadeParams}
-		class="backdrop:bg-gray-900/50 open:flex flex-col w-full rounded-lg divide-y text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700 divide-gray-300 dark:divide-gray-700 bg-white dark:bg-gray-800 pointer-events-auto my-auto mx-auto max-w-lg"
+		class="backdrop:bg-gray-900/50 open:flex flex-col w-full rounded-lg divide-y text-on-background border-gray-300 dark:border-gray-700 divide-gray-300 dark:divide-gray-700 bg-background dark:bg-gray-800 pointer-events-auto my-auto mx-auto max-w-lg"
 	>	
 
 		{@render children?.()}

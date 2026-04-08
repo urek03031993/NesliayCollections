@@ -2,8 +2,8 @@
 	<div class="bg-tertiary/5 absolute top-0 right-0 h-96 w-96 rounded-full blur-[120px]"></div>
 	<div class="bg-primary/5 absolute bottom-0 left-0 h-96 w-96 rounded-full blur-[120px]"></div>
 	<div class="relative z-10 mx-auto max-w-4xl space-y-12 px-8 text-center">
-		<div class="space-y-4">
-			<span class="material-symbols-outlined text-primary text-5xl">auto_awesome</span>
+		<div class="space-y-4">		
+			<svg xmlns="http://www.w3.org/2000/svg" width="70" height="70" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkles-icon lucide-sparkles text-primary mx-auto"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></svg>
 			<h2 class="font-notoSerif text-on-background text-4xl md:text-5xl">How it Works</h2>
 			<p class="text-on-surface-variant font-manrope mx-auto max-w-xl text-lg">
 				It's very easy to turn that night into a fairy tale, Just...

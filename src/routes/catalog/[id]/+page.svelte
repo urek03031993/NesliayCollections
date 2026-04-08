@@ -5,10 +5,13 @@
 	import type { ProductSizesInfo } from '$lib/server/types/Dto';
 	import ImageGalery from '$lib/components/ImageGalery/ImageGalery.svelte';
 	import { cart } from '$lib/stores/store';
+	import AviabilityCalendar from '$lib/components/AviabilityCalendar/AviabilityCalendar.svelte';
+	import Accordion from '$lib/components/Accordion/Accordion.svelte';
 
 	let { data }: PageProps = $props();
 
 	let size_index: number | undefined = $state();
+	let showCalendar = $state(false)
 	let current_size: ProductSizesInfo = $derived.by(()=>{	
 		if (size_index === undefined){
 			return {
@@ -22,7 +25,6 @@
 	});
 
 	function addDress(){
-		console.log('addItem')
 		cart.addItem({
 			id: data.product.id,
 			name: data.product.name,
@@ -31,8 +33,17 @@
 			available_quantity: current_size.available_quantity,
 			size_id: current_size.size_id,
 			size: current_size.size,
+			url: data.product.images.length > 0 ? data.product.images[0].url : '',
+			shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
 		});
 	}
+
+
+
+	let initialRentals = [
+		{ id: 1, start: '2026-04-10', end: '2026-04-15', quantity: 3, name: 'Reserva Semana Santa' },
+		{ id: 2, start: '2026-04-20', end: '2026-04-22', quantity: 5, name: 'Evento Corporativo' }
+	];
 </script>
 
 <Header />
@@ -89,7 +100,13 @@
 				</div>
 			</div>
 
-			<div class="mt-4 flex gap-4">
+			<Accordion title="Availability Calendar" open={ showCalendar }>
+				<AviabilityCalendar totalQuantity={current_size.available_quantity} rentals={initialRentals} onDateSelect={null}/>
+			</Accordion>
+
+			
+
+			<div class="mt-4 flex gap-4">				
 				<button class="text-white font-manrope h-16 flex-1 rounded-full text-lg font-bold shadow-xl transition-all hover:opacity-90 active:scale-95 flex items-center gap-4 justify-center"
 						style="background: linear-gradient(to right, #735c00, #d4af37);"
 						onclick={()=>{ addDress(); }}>
@@ -101,9 +118,3 @@
 	</div>	
 </main>
 
-<style>
-.bg-surface-container-low {
-    --tw-bg-opacity: 1;
-    background-color: rgb(246 243 237 / var(--tw-bg-opacity, 1));
-}
-</style>

@@ -1,50 +1,23 @@
-# Env Files
+node_modules
+
+# Output
+.output
+.vercel
+.netlify
+.wrangler
+/.svelte-kit
+/build
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
 .env
 .env.*
 !.env.example
 !.env.test
 
-# Out Directories
-/build
-/.svelte-kit
-/package
-
-# Dependencies
-/node_modules
-
-# System Files
-.DS_Store
-Thumbs.db
-
-# Logs
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
-
-# IDE
-.idea
-.vscode/*
-!.vscode/extensions.json
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# Coverage Tests
-/coverage
-
-# Temp
-*.log
-*.tmp
-.cache
-
 # Vite
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-
-# SvelteKit
-.output
-.vercel
-.netlify

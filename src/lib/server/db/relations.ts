@@ -6,8 +6,8 @@ import {
 	product_size,
 	// client,
 	// categorie,
-	// rental,
-	// rental_items,
+	rental,
+	rental_items,
 	// reservations_calendar,
 	// payment_orders,
 	// rental_history,
@@ -45,6 +45,25 @@ export const product_size_relations = relations(product_size, ({ one }) => ({
 			fields: [product_size.size_id],
 			references: [size.id],
 		})
+	})
+);
+
+
+export const rental_relations = relations(rental, ({ many }) => ({		
+		items: many(rental_items)		
+	})
+);
+
+
+export const rental_items_relations = relations(rental_items, ({ one }) => ({
+		rental: one(rental, {
+			fields: [rental_items.rental_id],
+			references: [rental.id],
+		}),
+		product_size: one(product_size, {
+			fields: [rental_items.rental_id],
+			references: [product_size.id],
+		}),
 	})
 );
 
@@ -95,30 +114,7 @@ export const product_size_relations = relations(product_size, ({ one }) => ({
 // );
 
 
-// export const rental_relations = relations(rental, ({ one, many }) => ({
-// 		client: one(client, {
-// 			fields: [rental.client_id],
-// 			references: [client.id],
-// 		}),
-// 		items: many(rental_items),
-// 		ordenesPago: many(payment_orders),
-// 		reservasCalendario: many(reservations_calendar),
-// 		historial: many(rental_history),
-// 	})
-// );
 
-
-// export const rental_items_relations = relations(rental_items, ({ one }) => ({
-// 		rental: one(rental, {
-// 			fields: [rental_items.rental_id],
-// 			references: [rental.id],
-// 		}),
-// 		product_variant: one(product_variant, {
-// 			fields: [rental_items.rental_id],
-// 			references: [product_variant.id],
-// 		}),
-// 	})
-// );
 
 
 // export const reservations_calendar_relations = relations(reservations_calendar, ({ one }) => ({

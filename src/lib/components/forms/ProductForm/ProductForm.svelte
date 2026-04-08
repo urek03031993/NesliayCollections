@@ -25,7 +25,7 @@
 	<div class="space-y-8 md:col-span-7">
 		<div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed p-1">
 			<div class="z-10 px-6 text-center">
-				<span class="material-symbols-outlined text-primary mb-4 text-5xl">cloud_upload</span>
+				
 				<p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
 				<p class="text-on-surface-variant font-body mt-2 text-sm">
 					High-resolution portrait recommended (4:5 ratio)
@@ -103,8 +103,7 @@
 			<div class="space-y-3">
 				<label class="group flex cursor-pointer items-center">
 					<div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
-						<input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" />
-						<span class="material-symbols-outlined text-primary scale-0 text-xs transition-transform peer-checked:scale-100">check</span>
+						<input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" />						
 					</div>
 					<span class="font-body text-on-surface ml-3 text-sm">Active</span>
 				</label>				

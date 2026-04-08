@@ -2,6 +2,7 @@
 	import type { PageProps } from "./$types";  
 	import { goto } from "$app/navigation";
 	import { resolve } from "$app/paths";
+	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";
     
     let { data, form }: PageProps = $props();
 
@@ -12,11 +13,15 @@
     });
 
     let files: FileList | null | undefined = $state(null);
-    let fileInput: HTMLInputElement;
+    let fileInput = $state<HTMLInputElement>();
+    let previewUrl = $state('');
+    let imgSrc = $state('');
 
     function clearFiles(): void {
-        files = null;
-		fileInput.value = '';
+        if(files && fileInput){
+            files = null;
+		    fileInput.value = '';
+        }        
 	}
 
 	function handleFileSelect(event: Event): void {
@@ -24,14 +29,59 @@
 		const selectedFiles = target.files; 
 
 		if (selectedFiles && selectedFiles.length > 0) {
-			files = selectedFiles;		
+			files = selectedFiles;
+            previewUrl = URL.createObjectURL(files[0]);	
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return;
+
+            const img = new Image();
+            const blobUrl = URL.createObjectURL(files[0]);
+            img.src = blobUrl;
+
+            img.onload = () => {
+                const maxWidth = 1080;
+                const maxHeight = 1350;
+                let width = img.width;
+                let height = img.height;
+
+                if (width > height) {
+                    if (width > maxWidth) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                    }
+                } else {
+                    if (height > maxHeight) {
+                    width = Math.round((width * maxHeight) / height);
+                    height = maxHeight;
+                    }
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+                ctx.drawImage(img, 0, 0, width, height);
+                imgSrc = canvas.toDataURL('image/jpeg', 0.9);
+                URL.revokeObjectURL(blobUrl);
+            };
+
+            img.onerror = () => {
+                URL.revokeObjectURL(blobUrl);
+                console.error('Error al cargar la imagen');
+            };  
 		}
+
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+        }
 	}
 
 	function triggerFileInput(): void {
-		fileInput.click();
+        if(fileInput) fileInput.click();
 	}
 </script>
+
+<AdminSidebar/>
 
 
 {#if form?.errors }    
@@ -57,38 +107,38 @@
             </div>
 
             <div class="space-y-8 md:col-span-7">
-                <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed p-1">
-                    <div class="z-10 px-6 text-center">
-                        <span class="material-symbols-outlined text-primary mb-4 text-5xl">cloud_upload</span>
-                        <p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
-                        <p class="text-on-surface-variant font-body mt-2 text-sm">
-                            High-resolution portrait recommended (4:5 ratio)
-                        </p>
-                        {#if files === null || files === undefined }
-                            <button class="text-primary mt-6 rounded-full bg-white px-6 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md" 
-                                    type="button" onclick={triggerFileInput} >
-                                Browse Files
-                            </button>
-                        {/if}
-
+                <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed p-1">
+                    {#if !files }
+                        <div class="z-10 px-6 text-center">
+                            <span class="material-symbols-outlined text-primary mb-4 text-5xl">cloud_upload</span>
+                            <p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
+                            <p class="text-on-surface-variant font-body mt-2 text-sm">
+                                High-resolution portrait recommended (4:5 ratio)
+                            </p>
+                            {#if files === null || files === undefined }
+                                <button class="text-primary mt-6 rounded-full bg-white px-6 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md" 
+                                        type="button" onclick={triggerFileInput} >
+                                    Browse Files
+                                </button>
+                            {/if}                            
+                            
+                            <input id="images" name="images" type="file" accept="image/*" hidden
+                                    bind:this={fileInput} onchange={handleFileSelect}/>
+                        </div>
+                    {/if}
+                    <div class="bg-surface-container-low absolute aspect-4/5 overflow-hidden rounded-3xl">
                         {#if files }
-                            <!-- <img alt="uploadImage"
-                                    class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                    src={ files.item(0)?.webkitRelativePath } 
-                                    loading="lazy"         
-                            /> -->
-
-                            <button class="text-primary mt-6 rounded-full bg-white px-6 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md" 
-                                    type="button" onclick={clearFiles}>
-                                <span class="material-symbols-outlined">delete_forever</span>
-                            </button>                            
-                        {/if}
-                        
-                        <input id="images" name="images" type="file" accept="image/*" hidden
-                                bind:this={fileInput} onchange={handleFileSelect}/>
-
+                            {#if imgSrc}
+                                <img src={imgSrc} alt="Vista previa"/>
+                            {/if}
+                            <div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
+                            <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+                                    onclick={clearFiles}
+                                    aria-label="delete">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            </button>                                                 
+                        {/if}                    
                     </div>
-                    <div class="bg-primary/5 pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
                 </div>
 
                 <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">			

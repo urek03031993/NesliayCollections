@@ -1,12 +1,18 @@
 <script lang="ts">
+	import { resolve } from '$app/paths';
+	import { cart, cartTotal } from '$lib/stores/store';
 	import Header from '$lib/components/Header/Header.svelte';
-	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';
-	import { cart } from '$lib/stores/store';
-	import { onMount } from 'svelte';
+	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';	
+	import Modal from '$lib/components/Modal/Modal.svelte';
+	import StripePaymentsForm from '$lib/components/forms/StripePaymentForm/StripePaymentsForm.svelte';
 
-	onMount(()=>{
-		cart.loadStoredItems();
-	});
+	let showModal: boolean = $state(false);
+
+	let cartItems: string = $derived(JSON.stringify($cart));
+	let startDate: Date | undefined = $state();
+	let endDate: Date | undefined = $state();
+	let invalidRental = $state(false)
+
 </script>
 
 <Header />
@@ -21,222 +27,123 @@
 		</p>
 	</div>
 
-	<div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
-		<div class="space-y-8 lg:col-span-7">
-			{#each $cart as item(item.product.id)}
-				<CartProductCard cartItem = { item }/>
-			{/each}
+	{#if $cart.length > 0}
+		<div class="grid grid-cols-1 gap-12 lg:grid-cols-12">
+			<div class="space-y-8 lg:col-span-7">
+				{#each $cart as item(item.product.id + item.product.size_id)}
+					<CartProductCard cartItem = { item } />
+				{/each}				
+			</div>
 
+			<div class="lg:col-span-5">
+				<div class="sticky top-32 space-y-6">
+					<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
+						<h2 class="font-notoSerif text-on-surface mb-8 text-3xl">Order Summary</h2>
+						<form method="POST">
+							<div class="mb-8 space-y-4">	
+								<div class="grid grid-cols-2 gap-4">
+									<div>
+										<label for="" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+										<input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all"  
+												type="date"
+												name="startDate"
+												required
+												bind:value={ startDate }										
+										/>
+									</div>
+									<div>
+										<label for="" class="block text-sm font-medium text-gray-700 mb-1">End Date</label>
+										<input class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-container focus:border-primary-container outline-none transition-all"
+												type="date"
+												name="endDate"
+												required
+												bind:value={ endDate }									
+										/>
+									</div>									
+								</div>
+								{#if invalidRental }
+									<p class="text-red-500 text-justify">La diferencia entre las fechas debe de ser menor a dos dias</p>	
+								{/if}
+													
+								<div class="text-on-surface-variant flex justify-between">
+									<span class="text-sm">Items Subtotal</span>
+									<span class="font-manrope font-medium">${ $cartTotal }</span>
+								</div>
 
+								<div class="text-on-surface-variant flex justify-between">
+									<span class="text-sm">Estimated Taxes</span>
+									<span class="font-manrope font-medium">${ Math.round($cartTotal * 0.07 * 100) / 100 }</span>
+								</div>
+							</div>
+							<div class="border-outline-variant/15 mb-10 flex items-baseline justify-between border-t pt-6">
+								<span class="font-notoSerif text-on-surface text-xl">Total</span>
+								<span class="font-notoSerif text-primary text-4xl">${$cartTotal + Math.round($cartTotal * 0.07 * 100) / 100}</span>
+							</div>
 
-			<!-- Item 1 -->
-			<div class="group bg-surface-container-lowest flex flex-col gap-8 rounded-3xl p-6 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(28,28,24,0.06)] md:flex-row">
-				<div class="bg-surface-container aspect-4/5 w-full overflow-hidden rounded-2xl md:w-48">
-					<img class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-							alt=""
-							data-alt="Ethereal silk evening gown in champagne"
-							src="https://lh3.googleusercontent.com/aida-public/AB6AXuDExP0KhjptA0Yi9Oz1Wms8lH6GcPGf5XYtMFqfaUoCyY3o2_eUmfd51Dv124cXLsRUDbC8zV877eVPmWkvsWSdP0t9ZEgHIs7qwPBZjul-1Du-dXqmehGZolitEz13wR6f91g2XxMiNlzjcKxLXHHHRFPCXsJfgn_NqqAWZxSQx6cKoAZeA6D5rNnLlR96yzB5OWWJOawUWV4EdkwCNhPQIGVUXDYlgjcT0dlg5JxRRKo2HBZ7ZAAN3r_SL5ryhn6NRTCsu2rhsMRt"
-					/>
-				</div>
+						
+							<input id="cartItems" bind:value={ cartItems } type="hidden" name="cartItems"/>					
 
-				<div class="flex grow flex-col justify-between py-2">
-					<div class="flex items-start justify-between">
-						<div>
-							<h3 class="font-notoSerif text-on-surface mb-1 text-2xl">Aurelia Silk Gown</h3>
-							<p class="text-on-surface-variant mb-4 text-sm italic">
-								Bespoke Collection • Champagne Gold
-							</p>
-							<div class="flex gap-4">
-								<span
-									class="bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 text-[10px] font-bold tracking-widest uppercase"
-									>Size: EU 38</span
-								>
-								<span
-									class="bg-surface-container-high text-on-surface-variant rounded-full px-3 py-1 text-[10px] font-bold tracking-widest uppercase"
-									>Custom Fitting</span
-								>
+							<button class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 mb-8 flex w-full items-center justify-center gap-3 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95"
+									style="background: linear-gradient(to right, #735c00, #d4af37);"
+									type="button"
+									onclick={()=>{ showModal = true }}>
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
+								Secure Checkout
+							</button>
+						</form>
+						
+
+						<div class="flex flex-col items-center gap-4">
+							<span class="text-on-surface-variant/60 text-[10px] font-bold tracking-widest uppercase">
+								Accepted At The Atelier
+							</span>
+							<div class="flex gap-4 opacity-40 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0">
+								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-credit-card-icon lucide-credit-card"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg>
+								<!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark-icon lucide-landmark opacity-90"><path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></svg> -->
+								<!-- <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-banknote-icon lucide-banknote"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg> -->
 							</div>
 						</div>
-						<button class="text-on-surface-variant hover:text-error transition-colors">
-							<span class="material-symbols-outlined">close</span>
-						</button>
 					</div>
-					<div class="mt-8 flex items-end justify-between">
-						<div class="bg-surface-container-low flex items-center gap-4 rounded-full px-4 py-2">
-							<button class="text-primary transition-transform hover:scale-110"
-								><span class="material-symbols-outlined text-sm">remove</span></button
-							>
-							<span class="font-manrope w-4 text-center text-sm font-bold">1</span>
-							<button class="text-primary transition-transform hover:scale-110"
-								><span class="material-symbols-outlined text-sm">add</span></button
-							>
-						</div>
-						<div class="text-right">
-							<span class="text-on-surface-variant mb-1 block text-xs tracking-widest uppercase"
-								>Subtotal</span
-							>
-							<span class="font-notoSerif text-primary text-2xl">$3,450.00</span>
-						</div>
-					</div>
-				</div>
-			</div>
 
-			<!-- Item 2 -->
-			<div
-				class="group bg-surface-container-lowest flex flex-col gap-8 rounded-3xl p-6 transition-all duration-500 hover:shadow-[0_8px_32px_rgba(28,28,24,0.06)] md:flex-row"
-			>
-				<div class="bg-surface-container aspect-4/5 w-full overflow-hidden rounded-2xl md:w-48">
-					<img
-						class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-						alt=""
-						data-alt="Delicate lace veil with floral embroidery"
-						src="https://lh3.googleusercontent.com/aida-public/AB6AXuDM2prMwl5w-8IxAdAYPQ40tA-8sUvn3UXh5PF8g3v7jxnPZCee5aj5L2D8MHPgxzfnZ2zEXMTyC2K4Y8zw4R40q5LOgI8pX2FO6byVyN4-bCaLA26DNGVsAS7wcVV8tqo5Xp9tRYLMtl8f7k7Sss2_8XKQ1SigvTolMpl9qL3o5cjx9xE-MzddA1FPt4lwRsmC556pGSCcSvgEf6lvlfTAyj-emQUupe-6XFim5_6dr-WInYQ2w8_rPj-ncYPoV2A4j2Kg1R8xVwGG"
-					/>
-				</div>
-				<div class="flex grow flex-col justify-between py-2">
-					<div class="flex items-start justify-between">
-						<div>
-							<h3 class="font-notoSerif text-on-surface mb-1 text-2xl">Celestial Lace Veil</h3>
-							<p class="text-on-surface-variant mb-4 text-sm italic">Accessories • Pure Ivory</p>
-							<div class="flex gap-4">
-								<span
-									class="bg-secondary-container text-on-secondary-container rounded-full px-3 py-1 text-[10px] font-bold tracking-widest uppercase"
-									>One Size</span
-								>
-							</div>
+					<div class="grid grid-cols-2 gap-4">
+						<div class="bg-surface-container-low flex flex-col items-center rounded-2xl p-4 text-center">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shield-icon lucide-shield"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
+							<span class="text-on-surface-variant text-[10px] font-bold tracking-widest uppercase">
+								Insured
+							</span>
 						</div>
-						<button class="text-on-surface-variant hover:text-error transition-colors">
-							<span class="material-symbols-outlined">close</span>
-						</button>
-					</div>
-					<div class="mt-8 flex items-end justify-between">
-						<div class="bg-surface-container-low flex items-center gap-4 rounded-full px-4 py-2">
-							<button class="text-primary transition-transform hover:scale-110"
-								><span class="material-symbols-outlined text-sm">remove</span></button
-							>
-							<span class="font-manrope w-4 text-center text-sm font-bold">1</span>
-							<button class="text-primary transition-transform hover:scale-110"
-								><span class="material-symbols-outlined text-sm">add</span></button
-							>
+						<div class="bg-surface-container-low flex flex-col items-center rounded-2xl p-4 text-center">
+							<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-feather-square-icon lucide-feather-square"><path d="M10.3 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-8.8"/><path d="M7 12l8.5-8.5c2-2 4.5-2 6.5 0L16.5 9H10"/></svg>
+							<span class="text-on-surface-variant text-[10px] font-bold tracking-widest uppercase">
+								Heritage Guarantee
+							</span>
 						</div>
-						<div class="text-right">
-							<span class="text-on-surface-variant mb-1 block text-xs tracking-widest uppercase"
-								>Subtotal</span
-							>
-							<span class="font-notoSerif text-primary text-2xl">$850.00</span>
-						</div>
-					</div>
-				</div>
-			</div>
-			<!-- Newsletter / Fitting Note (Asymmetric touch) -->
-			<div class="bg-surface-container-low border-outline-variant/10 mt-12 rounded-3xl border p-8">
-				<div class="mb-4 flex items-center gap-4">
-					<span class="material-symbols-outlined text-tertiary">auto_awesome</span>
-					<h4 class="font-notoSerif text-on-surface text-xl">Atelier Service</h4>
-				</div>
-				<p class="text-on-surface-variant mb-6 text-sm leading-relaxed">
-					Every piece from The Digital Atelier includes a complimentary virtual fitting with our
-					head couturier. Would you like to schedule yours now?
-				</p>
-				<button
-					class="text-primary flex items-center gap-2 text-xs font-bold tracking-widest uppercase transition-transform hover:translate-x-1"
-				>
-					Schedule Private Fitting <span class="material-symbols-outlined text-sm"
-						>arrow_forward</span
-					>
-				</button>
-			</div>
-		</div>
-		<!-- Summary Section (Column 8-12) -->
-		<div class="lg:col-span-5">
-			<div class="sticky top-32 space-y-6">
-				<div
-					class="bg-surface-container-lowest rounded-3xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]"
-				>
-					<h2 class="font-notoSerif text-on-surface mb-8 text-3xl">Order Summary</h2>
-					<div class="mb-8 space-y-4">
-						<div class="text-on-surface-variant flex justify-between">
-							<span class="text-sm">Items Subtotal</span>
-							<span class="font-manrope font-medium">$4,300.00</span>
-						</div>
-						<div class="text-on-surface-variant flex justify-between">
-							<span class="text-sm">White Glove Delivery</span>
-							<span class="font-manrope font-medium">$120.00</span>
-						</div>
-						<div class="text-on-surface-variant flex justify-between">
-							<span class="text-sm">Estimated Taxes</span>
-							<span class="font-manrope font-medium">$344.00</span>
-						</div>
-					</div>
-					<div
-						class="border-outline-variant/15 mb-10 flex items-baseline justify-between border-t pt-6"
-					>
-						<span class="font-notoSerif text-on-surface text-xl">Total</span>
-						<span class="font-notoSerif text-primary text-4xl">$4,764.00</span>
-					</div>
-					<!-- Secure Checkout Button -->
-					<button
-						class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 mb-8 flex w-full items-center justify-center gap-3 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95"
-					>
-						<span class="material-symbols-outlined text-lg">lock</span>
-						Secure Checkout
-					</button>
-					<!-- Payment Icons -->
-					<div class="flex flex-col items-center gap-4">
-						<span class="text-on-surface-variant/60 text-[10px] font-bold tracking-widest uppercase"
-							>Accepted At The Atelier</span
-						>
-						<div
-							class="flex gap-4 opacity-40 grayscale transition-all duration-500 hover:opacity-100 hover:grayscale-0"
-						>
-							<span class="material-symbols-outlined text-3xl">credit_card</span>
-							<span class="material-symbols-outlined text-3xl">account_balance</span>
-							<span class="material-symbols-outlined text-3xl">contactless</span>
-							<span class="material-symbols-outlined text-3xl">payments</span>
-						</div>
-					</div>
-				</div>
-				<!-- Trust Signals -->
-				<div class="grid grid-cols-2 gap-4">
-					<div
-						class="bg-surface-container-low flex flex-col items-center rounded-2xl p-4 text-center"
-					>
-						<span class="material-symbols-outlined text-primary mb-2">shield</span>
-						<span class="text-on-surface-variant text-[10px] font-bold tracking-widest uppercase"
-							>Insured Shipping</span
-						>
-					</div>
-					<div
-						class="bg-surface-container-low flex flex-col items-center rounded-2xl p-4 text-center"
-					>
-						<span class="material-symbols-outlined text-primary mb-2">history_edu</span>
-						<span class="text-on-surface-variant text-[10px] font-bold tracking-widest uppercase"
-							>Heritage Guarantee</span
-						>
-					</div>
+					</div>					
 				</div>
 			</div>
 		</div>
-	</div>
-	<!-- Empty State (Hidden by default, used for logic) -->
-	<div class="hidden flex-col items-center justify-center py-24 text-center">
-		<div class="text-outline-variant/30 mb-8 h-32 w-32">
-			<span
-				class="material-symbols-outlined text-[120px]"
-				style="font-variation-settings: 'wght' 100;">shopping_basket</span
-			>
-		</div>
-		<h2 class="font-notoSerif text-on-surface mb-4 text-4xl">Your basket is empty</h2>
-		<p class="text-on-surface-variant mb-12 max-w-sm">
-			Return to our collections to discover pieces crafted for enchantment and timeless elegance.
-		</p>
-		<a
-			class="bg-surface-container-highest text-primary hover:bg-primary rounded-full px-8 py-4 text-xs font-bold tracking-widest uppercase transition-all duration-300 hover:text-white"
-			href="#/"
-		>
-			Explore Collections
-		</a>
-	</div>
+	{:else }	
+		<div class="flex-col items-center justify-center py-24 text-center">
+			<div class="text-outline-variant mb-8 h-32 w-32">
+				<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
+			</div>
+			<h2 class="font-notoSerif text-on-surface mb-4 text-4xl">Your basket is empty</h2>
+			<p class="text-on-surface-variant mb-12 max-w-sm">
+				Return to our collections to discover pieces crafted for enchantment and timeless elegance.
+			</p>
+			<a	class="bg-surface-container-highest text-primary hover:bg-primary rounded-full px-8 py-4 text-xs font-bold tracking-widest uppercase transition-all duration-300 hover:text-white"
+				href={resolve('/catalog')}>
+				Explore Collections
+			</a>
+		</div>	
+	{/if}	
 </main>
+
+
+<Modal open={ showModal }>
+	<StripePaymentsForm { startDate } { endDate }/>
+</Modal>
+
+
 
 

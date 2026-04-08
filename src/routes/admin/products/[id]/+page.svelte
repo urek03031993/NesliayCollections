@@ -2,6 +2,7 @@
 	import type { PageProps } from "./$types";  
 	import { goto } from "$app/navigation";
 	import { resolve } from "$app/paths";
+	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";
     
     let { data, form }: PageProps = $props();
 
@@ -11,6 +12,8 @@
         }
     });
 </script>
+
+<AdminSidebar/>
 
 {#if form?.errors }    
     <p>{ form?.errors }</p>    

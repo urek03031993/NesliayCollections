@@ -14,7 +14,7 @@ if (!process.env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
 // 		port: 5432, 
 // 		user: 'admin', 
 // 		password: '123', 
-// 		database: 'NesliayCollections'
+// 		database: 'NeliayCollections'
 // 	},
 // 	verbose: true,
 // 	strict: true

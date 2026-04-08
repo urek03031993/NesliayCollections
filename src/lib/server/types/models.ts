@@ -8,7 +8,7 @@ import {
 	product_size,
 	// client,
 	// categorie,
-	// rental,
+	rental,
 	// rental_items,
 	// reservations_calendar,
 	// payment_orders,
@@ -36,9 +36,7 @@ export type User = InferSelectModel<typeof user>;
 export type Image = InferSelectModel<typeof image>;
 export type Product = InferSelectModel<typeof product>;
 export type ProductSize = InferSelectModel<typeof product_size>;
-// export type Client = InferSelectModel<typeof client>;
-// export type Categorie = InferSelectModel<typeof categorie>;
-// export type Rental = InferSelectModel<typeof rental>;
+export type Rental = InferSelectModel<typeof rental>;
 // export type RentalItem = InferSelectModel<typeof rental_items>;
 // export type ReservationsCalendar = InferSelectModel<typeof reservations_calendar>;
 // export type PaymentOrder = InferSelectModel<typeof payment_orders>;
@@ -54,11 +52,7 @@ export type NewUser = InferInsertModel<typeof user>;
 export type NewImage = InferInsertModel<typeof image>;
 export type NewProduct = InferInsertModel<typeof product>;
 export type NewProductSize = InferInsertModel<typeof product_size>;
-// export type NewClient = InferInsertModel<typeof client>;
-// export type NewCategorie = InferInsertModel<typeof categorie>;
-// export type NewProductImage = InferInsertModel<typeof product_image>;
-// export type NewProductVariant = InferInsertModel<typeof product_variant>;
-// export type NewRental = InferInsertModel<typeof rental>;
+export type NewRental = InferInsertModel<typeof rental>;
 // export type NewRentalItem = InferInsertModel<typeof rental_items>;
 // export type NewReservationsCalendar = InferInsertModel<typeof reservations_calendar>;
 // export type NewPaymentOrder = InferInsertModel<typeof payment_orders>;

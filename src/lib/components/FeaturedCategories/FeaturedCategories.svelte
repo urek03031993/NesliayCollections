@@ -10,7 +10,7 @@
                 <h3 class="font-notoSerif text-4xl text-white mb-4">Weddings</h3>
                 <p class="text-white/80 font-manrope mb-6 max-w-md">Ethereal ensembles for the flower girls and miniature gentlemen of the ceremony.</p>
                 <span class="text-white font-bold flex items-center gap-2">Discover Collection 
-                    <span class="material-symbols-outlined">arrow_right_alt</span>
+                    
                 </span>
             </div>
         </div>
