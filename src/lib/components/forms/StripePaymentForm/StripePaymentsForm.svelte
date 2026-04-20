@@ -2,7 +2,7 @@
 	import { onMount } from 'svelte';
 	import { loadStripe } from '@stripe/stripe-js';
 	import type { Stripe, StripeElements } from '@stripe/stripe-js';
-	import { PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY } from '$env/static/public';
+	import { STRIPE_PUBLISHABLE_KEY } from '$env/static/private';
 	import { Elements, PaymentElement } from 'svelte-stripe';
 	import { cart, cartTotal } from '$lib/stores/store';
 
@@ -27,7 +27,7 @@
 	});
 
 	onMount(async () => {
-		stripe = await loadStripe(PUBLIC_STRIPE_TEST_PUBLISHABLE_KEY);
+		stripe = await loadStripe(STRIPE_PUBLISHABLE_KEY);
 	});
 
 	
