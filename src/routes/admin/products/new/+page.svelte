@@ -2,7 +2,8 @@
 	import type { PageProps } from "./$types";  
 	import { goto } from "$app/navigation";
 	import { resolve } from "$app/paths";
-	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";
+	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";	
+
     
     let { data, form }: PageProps = $props();
 
@@ -12,21 +13,20 @@
         }
     });
 
-    let files: FileList | null | undefined = $state(null);
-    let fileInput = $state<HTMLInputElement>();
+    let files: FileList | undefined | null  = $state();
+    let fileInput: HTMLInputElement | undefined= $state();
     let previewUrl = $state('');
     let imgSrc = $state('');
 
     function clearFiles(): void {
-        if(files && fileInput){
+        if(files){ 
             files = null;
-		    fileInput.value = '';
+            imgSrc = ''; 
         }        
 	}
 
-	function handleFileSelect(event: Event): void {
-		const target = event.target as HTMLInputElement;
-		const selectedFiles = target.files; 
+	function handleFileSelect(): void {
+		const selectedFiles = fileInput?.files;
 
 		if (selectedFiles && selectedFiles.length > 0) {
 			files = selectedFiles;
@@ -67,7 +67,6 @@
 
             img.onerror = () => {
                 URL.revokeObjectURL(blobUrl);
-                console.error('Error al cargar la imagen');
             };  
 		}
 
@@ -76,7 +75,7 @@
         }
 	}
 
-	function triggerFileInput(): void {
+	function openFileInput(): void {
         if(fileInput) fileInput.click();
 	}
 </script>
@@ -99,7 +98,7 @@
             </p>
         </div>
         
-        <form class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" enctype="multipart/form-data">
+        <form name="productForm" class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" enctype="multipart/form-data" data-netlify="true">
             <div class="space-y-1 md:col-span-12">
                 <label for="name" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Name</label>
                 <input class="bg-surface-container-low focus:ring-primary/20 font-headline placeholder:text-outline w-full rounded-lg border-none p-4 text-xl italic transition-all focus:ring-2"
@@ -109,32 +108,32 @@
             <div class="space-y-8 md:col-span-7">
                 <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed p-1">
                     {#if !files }
-                        <div class="z-10 px-6 text-center">
-                            <span class="material-symbols-outlined text-primary mb-4 text-5xl">cloud_upload</span>
+                        <div class="z-10 px-6 text-center justify-items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload-icon lucide-cloud-upload text-primary mb-4 text-5xl"><path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/></svg>
                             <p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
                             <p class="text-on-surface-variant font-body mt-2 text-sm">
                                 High-resolution portrait recommended (4:5 ratio)
                             </p>
                             {#if files === null || files === undefined }
                                 <button class="text-primary mt-6 rounded-full bg-white px-6 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md" 
-                                        type="button" onclick={triggerFileInput} >
+                                        type="button" onclick={()=>{ openFileInput()}}> 
                                     Browse Files
                                 </button>
-                            {/if}                            
-                            
-                            <input id="images" name="images" type="file" accept="image/*" hidden
-                                    bind:this={fileInput} onchange={handleFileSelect}/>
+                            {/if}                        
                         </div>
                     {/if}
+                    <input id="images" name="images" type="file" accept="image/png, image/jpeg" hidden
+                                    bind:this={ fileInput } onchange={ handleFileSelect }/>
                     <div class="bg-surface-container-low absolute aspect-4/5 overflow-hidden rounded-3xl">
                         {#if files }
                             {#if imgSrc}
-                                <img src={imgSrc} alt="Vista previa"/>
+                                <img src={ imgSrc } alt="Vista previa"/>
                             {/if}
                             <div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
                             <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-                                    onclick={clearFiles}
-                                    aria-label="delete">
+                                    onclick={()=>{ clearFiles() }}
+                                    type="button"
+                                    title="delete">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                             </button>                                                 
                         {/if}                    
@@ -178,6 +177,18 @@
 
                     <div class="space-y-2">
                         <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
+                            Category
+                        </label>
+                        <select class="bg-surface-container-low focus:ring-primary/20 font-body w-full rounded-lg border-none p-4 transition-all focus:ring-2"
+                                id="category" name="category">
+                            <option value="mommy_and_me">Mommy and Me</option>
+                            <option value="boys">Boys</option>
+                            <option value="girls">Girls</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                             Rental Price (USD)
                         </label>
                         <div class="relative">
@@ -207,7 +218,7 @@
                         <label class="group flex cursor-pointer items-center">
                             <div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
                                 <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" />
-                                <span class="material-symbols-outlined text-primary scale-0 text-xs transition-transform peer-checked:scale-100">check</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
                             </div>
                             <span class="font-body text-on-surface ml-3 text-sm">Active</span>
                         </label>				

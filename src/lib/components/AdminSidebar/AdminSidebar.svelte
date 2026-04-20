@@ -32,41 +32,16 @@
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-dress-icon lucide-dress"><path d="M16 2v3a5.14 5.14 0 0 1 .7 4.8l-.2.5a7.64 7.64 0 0 0 .4 6.3C17.7 17.9 19 20 19 20s-3.1 2-7 2-7-2-7-2 1.3-2.1 2.1-3.5a7.64 7.64 0 0 0 .4-6.2l-.2-.5A5.66 5.66 0 0 1 8 5V2"/><path d="M16 5c-1.8 0-3.3 1-4 2.5C11.3 6 9.8 5 8 5"/></svg>
 			<span class="font-manrope text-sm font-medium">Dresses</span>
 		</a>
-        <!-- <a  class="flex items-center gap-3 px-8 py-3 text-[#4d4635] transition-all duration-200 hover:bg-[#ffffff]/50"
-			href="#">
-			<span class="font-manrope text-sm font-medium">Orders</span>
+		<a  class="flex items-center gap-3 py-3 transition-all duration-200 { urlPath.startsWith('/admin/rentals') ? activeClass  :  defaultClass }"
+			href={resolve('/admin/rentals')}>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tuxedo-icon lucide-tuxedo"><path d="M10 3v2l4-2v2Z"/><path d="M18 3h1a2 2 0 0 1 1.7 3A5270.5 5270.5 0 0 0 12 21S6.8 12 3.3 6A2 2 0 0 1 5 3h1"/><path d="M12 9h.01"/><path d="M12 13h.01"/><path d="M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>
+			<span class="font-manrope text-sm font-medium">Rentals</span>
 		</a>
-		<a
-			class="flex items-center gap-3 px-8 py-3 text-[#4d4635] transition-all duration-200 hover:bg-[#ffffff]/50"
-			href="#"
-		>
-			<span class="font-manrope text-sm font-medium">Clients</span>
-		</a>
-		<a
-			class="flex items-center gap-3 px-8 py-3 text-[#4d4635] transition-all duration-200 hover:bg-[#ffffff]/50"
-			href="#"
-		>
-			<span class="font-manrope text-sm font-medium">Fitting Room</span>
-		</a>
-		<a
-			class="flex items-center gap-3 px-8 py-3 text-[#4d4635] transition-all duration-200 hover:bg-[#ffffff]/50"
-			href="#"
-		>
-			<span class="font-manrope text-sm font-medium">Analytics</span>
-		</a> -->
 	</nav>
 	<!-- <div class="mt-auto space-y-4 px-8">
-		<button
-			class="bg-primary text-on-primary font-manrope w-full rounded-full py-3 text-sm font-bold shadow-lg transition-opacity hover:opacity-90"
-		>
-			Book a Fitting
-		</button>
 		<div class="space-y-2 pt-6">
-			<a class="flex items-center gap-3 text-sm font-medium text-[#4d4635]" href="#">
-				Settings
-			</a>
-			<a class="flex items-center gap-3 text-sm font-medium text-[#4d4635]" href="#">
-				Help
+			<a class="flex items-center gap-3 text-sm font-medium text-on-surface-variant" href={resolve('/logout')}>
+				Logout
 			</a>
 		</div>
 	</div> -->

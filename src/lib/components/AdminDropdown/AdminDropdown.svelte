@@ -36,7 +36,7 @@
 {/if}
 
 <Modal title='Login' bind:open={ openModal }>
-    <form class="mt-2 space-y-6" method="POST">
+    <form name="loginForm" class="mt-2 space-y-6" method="POST" data-netlify="true">
         <div class="space-y-1">
             <label for="username" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Usuario</label>
             <input class="w-full bg-surface-container-low border-none rounded-lg p-4 pl-8 focus:ring-2 focus:ring-primary/20 transition-all font-body text-black"
@@ -51,7 +51,7 @@
         <div class="flex justify-end">
             <button class="px-5 py-2.5 rounded-lg font-bold text-white justify-end disabled:opacity-50 disabled:cursor-not-allowed"
                 style="background: linear-gradient(to right, #735c00, #d4af37);"
-                type="submit" disabled={ !username || !password } >Acceder</button>
+                type="submit" disabled={ !username || !password } >Access</button>
         
         </div>
     </form>

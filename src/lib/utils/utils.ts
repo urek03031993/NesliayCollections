@@ -33,3 +33,15 @@ export function buildImageName(fileName: string): string {
 export function buildSlug(name: string, color: string): string {
 	return name.toLowerCase() + color.toLowerCase()
 }
+
+export function isValidRentalPeriod(startDate: Date, endDate: Date): boolean {
+	if (!startDate || !endDate) return false;
+
+	const initialDate = new Date(startDate);
+	const finalDate = new Date(endDate);
+
+	const diffTime = Math.abs(finalDate.getTime() - initialDate.getTime());
+	const diffDays = diffTime / (1000 * 60 * 60 * 24);
+
+	return diffDays > 2;
+};

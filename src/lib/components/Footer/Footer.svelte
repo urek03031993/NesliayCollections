@@ -22,7 +22,7 @@
                     <a class="hover:text-primary" href={resolve('/catalog')}>Catalog</a>
                 </li>
                 <li>
-                    <a class="hover:text-primary" href={resolve('/')}>Collections</a> 
+                    <a class="hover:text-primary" href={resolve('/collections')}>Collections</a> 
                 </li>
                 <li>
                     <a class="hover:text-primary" href={resolve('/')}>Contact</a>

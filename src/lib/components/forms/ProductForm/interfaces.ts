@@ -1,4 +1,4 @@
-import type { Size } from "$lib/server/types/models";
+import type { ProductCategory, Size } from "$lib/server/types/models";
 
 
 export interface ProductForm {
@@ -16,6 +16,7 @@ export interface CreateProduct {
     name: string,
     color: string, 
     description: string,
+    category: ProductCategory;
     price: number, 
     quantity: number, 
     size_id: number, 
@@ -51,7 +52,8 @@ export interface ShoppingCarProduct {
     size_id: number;
     size: string;
     url: string;
-    shortDescription: string; 
+    shortDescription: string;
+    product_size_id: number,
 }
 
 

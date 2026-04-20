@@ -18,7 +18,7 @@ export const actions = {
     default: async ({ request, fetch }) => {
         const formData = await request.formData();
         const file = formData.get('images');
-        const body = buildRequestBody(formData);      
+        const body = buildRequestBody(formData);  
 
 
         if (file && (file instanceof File)){
@@ -45,10 +45,14 @@ export const actions = {
             const { data: urlData } = supabase.storage.from('NesliayCollections').getPublicUrl(fileName);
             
             if(urlData){
-                body['url'] = urlData.publicUrl
+                body['url'] = urlData.publicUrl ?? file.name
                 console.log('Url publica foto');
+            }else{
+                body['url'] = file.name
             }
         }
+
+        console.log(body, 'cliente server')
 
         const response = await fetch('/api/products', {
             method: 'POST',

@@ -7,16 +7,13 @@ import {    pgTable,
             decimal, 
             date, 
             timestamp,
-            // unique,            
             } from 'drizzle-orm/pg-core';
 
 import {  sizeTypeEnum, 
           rentalStatusEnum, 
           paymentOrderStatusEnum,
-        //   guaranteeStatusEnum,
-        //   paymentTypeEnum,
           paymentMethodEnum,
-        //   reservationTypeEnum
+          productCategoryTypeEnum,
         } from './enums.ts';
 
 
@@ -36,6 +33,7 @@ export const product = pgTable('product', {
     name: varchar('name', { length: 255 }).notNull(),
     description: text('description'),    
     color: varchar('color', { length: 7 }).notNull(),
+    category: productCategoryTypeEnum('category').default('mommy_and_me').notNull(),
     activo: boolean('activo').default(true),
     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
@@ -76,6 +74,7 @@ export const product_size = pgTable('product_size', {
 export const rental = pgTable('rental', {
     id: serial('id').primaryKey(),
     rentalId: varchar('rental_id').unique().notNull(),
+    clientId: integer().notNull().references(() => client.id, { onDelete: 'cascade' }),    
     start_date: date('start_date').notNull(),
     end_date: date('end_date').notNull(),
     tax_amount: decimal('tax_amount', { precision: 10, scale: 2 }).default('0').notNull(),
@@ -101,16 +100,17 @@ export const rental_items = pgTable('rental_items', {
     createdAt: timestamp('created_at').defaultNow(),
 });
 
-
+    
 export const payment_orders = pgTable('payment_orders', {
     id: serial('id').primaryKey(),
     rental_id: integer('rental_id').notNull().references(() => rental.id, { onDelete: 'cascade' }),
     orderId: varchar('order_id', { length: 50 }).unique(),
+    customerId: varchar('customer_id').notNull(),
     state: paymentOrderStatusEnum('state').default('pending').notNull(),
     amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),
     amount_received: decimal('amount_received', { precision: 10, scale: 2 }),
     payment_method: paymentMethodEnum('payment_method').default('debit_card'),
-    reference: varchar('reference', { length: 100 }),
+    reference: varchar('reference', { length: 100 }).notNull(),
     payment_gate: varchar('payment_gate', { length: 50 }),
     transaction_data: text('transaction_data'),
     paid_at: timestamp('paid_at', { withTimezone: true }),
@@ -121,53 +121,21 @@ export const payment_orders = pgTable('payment_orders', {
 });
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// export const client = pgTable('client', {
-//     id: serial('id').primaryKey(),
-//     name: varchar('name', { length: 100 }).notNull(),
-//     last_name: varchar('last_name', { length: 100 }).notNull(),
-//     email: varchar('email', { length: 255 }).notNull().unique(),
-//     phone: varchar('phone', { length: 20 }),
-//     document_type: varchar('document_type', { length: 20 }).default('license'), 
-//     identification_document: varchar('identification_document', { length: 20 }).notNull().unique(), 
-//     address: text('address'),
-//     city: varchar('city', { length: 100 }),
-//     postal_code: varchar('postal_code', { length: 20 }),
-//     country: varchar('country', { length: 50 }).default('United States'),
-//     birth_date: date('birth_date'),
-//     createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
-//     updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
-// });
+export const client = pgTable('client', {
+    id: serial('id').primaryKey(),
+    name: varchar('name', { length: 100 }).notNull(),
+    last_name: varchar('last_name', { length: 100 }).notNull(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    phone: varchar('phone', { length: 20 }),
+    document_type: varchar('document_type', { length: 20 }).default('license'), 
+    identification_document: varchar('identification_document', { length: 20 }).notNull().unique(), 
+    address: text('address'),
+    city: varchar('city', { length: 100 }),
+    postal_code: varchar('postal_code', { length: 20 }),
+    country: varchar('country', { length: 50 }).default('United States'),
+    createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).defaultNow().notNull(),
+});
 
 
 // export const configuration = pgTable('configuration', {

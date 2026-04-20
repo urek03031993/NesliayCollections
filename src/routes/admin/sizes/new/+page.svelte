@@ -27,7 +27,7 @@
             </p>
         </div>
         
-        <form method="POST" use:enhance>
+        <form name="sizeForm" method="POST" use:enhance data-netlify="true">
             <div class="space-y-1 mt-5">
                 <label for="size" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">size</label>
                 <input class="w-full bg-surface-container-low border-none rounded-lg p-4 pl-8 focus:ring-2 focus:ring-primary/20 transition-all font-body text-black"

@@ -61,20 +61,6 @@
     --radius-full: 9999px;
 }
 
-
-
-
-
-
-.material-symbols-outlined {
-    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-}
-
 .font-notoSerif { font-family: 'Noto Serif', serif; }
 
 .font-manrope { font-family: 'Manrope', sans-serif; }
-
-.text-primary {
-    --tw-text-opacity: 1;
-    color: rgb(115 92 0 / var(--tw-text-opacity, 1));
-}

@@ -12,33 +12,46 @@
 
 	let size_index: number | undefined = $state();
 	let showCalendar = $state(false)
-	let current_size: ProductSizesInfo = $derived.by(()=>{	
-		if (size_index === undefined){
-			return {
-				size_id: 0,
-				size: 'None',
-				price: 0.00,
-				available_quantity: 0
-			}
-		}	
-		return data.product.sizes[size_index]
+	let current_size: ProductSizesInfo | undefined = $derived.by(()=>{	
+		if (data.product.sizes.length === 0) return undefined;
+
+		if (size_index !== undefined && data.product.sizes[size_index]) {
+			return data.product.sizes[size_index];
+		}
+
+		return data.product.sizes[0];
 	});
 
 	function addDress(){
-		cart.addItem({
-			id: data.product.id,
-			name: data.product.name,
-			color: data.product.color,
-			price: current_size.price,
-			available_quantity: current_size.available_quantity,
-			size_id: current_size.size_id,
-			size: current_size.size,
-			url: data.product.images.length > 0 ? data.product.images[0].url : '',
-			shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
-		});
-	}
-
-
+		console.log('Selected size index:', size_index);
+		if ( current_size ){
+			cart.addItem({
+				id: data.product.id,
+				name: data.product.name,
+				color: data.product.color,
+				price: current_size.price,
+				available_quantity: current_size.available_quantity,
+				size_id: current_size.size_id,
+				size: current_size.size,
+				product_size_id: current_size.id,
+				url: data.product.images.length > 0 ? data.product.images[0].url : '',
+				shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
+			});
+		}
+		// console.log('Adding to cart:', {
+		// 	id: data.product.id,
+		// 	name: data.product.name,
+		// 	color: data.product.color,
+		// 	price: current_size.price,
+		// 	available_quantity: current_size.available_quantity,
+		// 	size_id: current_size.size_id,
+		// 	size: current_size.size,
+		// 	product_size_id: current_size.id,
+		// 	url: data.product.images.length > 0 ? data.product.images[0].url : '',
+		// 	shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
+		// });	
+		console.log('Current cart items:', $cart);
+	}	
 
 	let initialRentals = [
 		{ id: 1, start: '2026-04-10', end: '2026-04-15', quantity: 3, name: 'Reserva Semana Santa' },
@@ -49,8 +62,8 @@
 <Header />
 
 <main class="mx-auto max-w-screen-2xl px-4 pt-32 pb-24 md:px-12">
-	<a class="text-primary font-bold flex items-center gap-2 group" href={resolve('/catalog')}>
-		<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">keyboard_backspace</span>
+	<a class="text-primary font-bold flex items-center gap-2 group mb-2.5" href={resolve('/catalog')}>
+		<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-move-left-icon lucide-move-left group-hover:translate-x-1 transition-transform"><path d="M6 8L2 12L6 16"/><path d="M2 12H22"/></svg>
 		Back to Catalog 
 	</a>
 
@@ -67,7 +80,7 @@
 					{ data.product.name }
 				</h1>
 				<div class="flex items-center gap-4">
-					<span class="font-manrope text-primary text-2xl font-medium">${ current_size.price }</span>
+					<span class="font-manrope text-primary text-2xl font-medium">${ current_size?.price }</span>
 					<div class="bg-outline-variant/30 h-4 w-px"></div>					
 				</div>
 			</div>
@@ -101,7 +114,7 @@
 			</div>
 
 			<Accordion title="Availability Calendar" open={ showCalendar }>
-				<AviabilityCalendar totalQuantity={current_size.available_quantity} rentals={initialRentals} onDateSelect={null}/>
+				<AviabilityCalendar totalQuantity={current_size?.available_quantity || 0} rentals={initialRentals} onDateSelect={null}/>
 			</Accordion>
 
 			

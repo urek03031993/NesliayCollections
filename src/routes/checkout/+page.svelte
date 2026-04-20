@@ -1,18 +1,27 @@
 <script lang="ts">
-	import { resolve } from '$app/paths';
+	import { resolve, asset } from '$app/paths';
 	import { cart, cartTotal } from '$lib/stores/store';
 	import Header from '$lib/components/Header/Header.svelte';
 	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';	
 	import Modal from '$lib/components/Modal/Modal.svelte';
 	import StripePaymentsForm from '$lib/components/forms/StripePaymentForm/StripePaymentsForm.svelte';
+	import { isValidRentalPeriod } from '$lib/utils/utils';
 
 	let showModal: boolean = $state(false);
-
 	let cartItems: string = $derived(JSON.stringify($cart));
 	let startDate: Date | undefined = $state();
 	let endDate: Date | undefined = $state();
-	let invalidRental = $state(false)
+	let rentalAgreement: boolean = $state(false);
 
+	let invalidRentalDays = $derived.by(() => {		
+		if (!startDate || !endDate) return false;
+
+		return isValidRentalPeriod(startDate, endDate);
+	});
+
+	let validCheckout = $derived.by(() => {
+		return !invalidRentalDays && rentalAgreement;
+	});
 </script>
 
 <Header />
@@ -39,7 +48,7 @@
 				<div class="sticky top-32 space-y-6">
 					<div class="bg-surface-container-lowest rounded-3xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
 						<h2 class="font-notoSerif text-on-surface mb-8 text-3xl">Order Summary</h2>
-						<form method="POST">
+						<form name="checkoutForm" method="POST" data-netlify="true">
 							<div class="mb-8 space-y-4">	
 								<div class="grid grid-cols-2 gap-4">
 									<div>
@@ -61,7 +70,7 @@
 										/>
 									</div>									
 								</div>
-								{#if invalidRental }
+								{#if invalidRentalDays }
 									<p class="text-red-500 text-justify">La diferencia entre las fechas debe de ser menor a dos dias</p>	
 								{/if}
 													
@@ -75,15 +84,26 @@
 									<span class="font-manrope font-medium">${ Math.round($cartTotal * 0.07 * 100) / 100 }</span>
 								</div>
 							</div>
-							<div class="border-outline-variant/15 mb-10 flex items-baseline justify-between border-t pt-6">
+							<div class="border-outline-variant/15 mb-8 flex items-baseline justify-between border-t pt-6">
 								<span class="font-notoSerif text-on-surface text-xl">Total</span>
 								<span class="font-notoSerif text-primary text-4xl">${$cartTotal + Math.round($cartTotal * 0.07 * 100) / 100}</span>
 							</div>
-
 						
-							<input id="cartItems" bind:value={ cartItems } type="hidden" name="cartItems"/>					
+							<input id="cartItems" bind:value={ cartItems } type="hidden" name="cartItems"/>	
 
-							<button class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 mb-8 flex w-full items-center justify-center gap-3 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95"
+							 <div class="space-y-1 mb-8">
+								<label class="group flex cursor-pointer items-center"> 
+									<div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
+										<input class="peer absolute h-full w-full cursor-pointer opacity-0" bind:checked={ rentalAgreement } type="checkbox" name="rentalAgreement"/>
+										<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
+									</div>
+									<span class="font-body text-on-surface ml-3 text-sm">I accept the terms of the
+										<a href={ asset('/Neliay_Collection_LLC_Agreement.pdf') } target="_blank" class="underline" rel="noopener noreferrer">Neliay Collections Rental Agreement</a>
+									</span>
+								</label>				
+							</div>				
+
+							<button disabled = { !validCheckout } class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 mb-8 flex w-full items-center justify-center gap-3 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
 									style="background: linear-gradient(to right, #735c00, #d4af37);"
 									type="button"
 									onclick={()=>{ showModal = true }}>
@@ -133,7 +153,7 @@
 			</p>
 			<a	class="bg-surface-container-highest text-primary hover:bg-primary rounded-full px-8 py-4 text-xs font-bold tracking-widest uppercase transition-all duration-300 hover:text-white"
 				href={resolve('/catalog')}>
-				Explore Collections
+				Explore Catalog
 			</a>
 		</div>	
 	{/if}	
@@ -141,9 +161,6 @@
 
 
 <Modal open={ showModal }>
-	<StripePaymentsForm { startDate } { endDate }/>
+	<StripePaymentsForm { startDate } { endDate } { rentalAgreement }/>
 </Modal>
-
-
-
 

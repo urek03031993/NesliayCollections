@@ -16,7 +16,7 @@
     </h3> 
  
     <div class="flex items-center justify-center">
-        <form method="POST">
+        <form name="deleteForm" method="POST" data-netlify="true">
             <input type="hidden" name="id" value={ id } required/>
 
             <div class="space-x-2">

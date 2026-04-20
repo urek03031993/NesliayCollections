@@ -18,6 +18,7 @@ export const GET: RequestHandler = async ({ params }) => {
 					name: true,
 					description: true,
 					color: true,
+					category: true
 				}				
 			});
 
@@ -26,6 +27,7 @@ export const GET: RequestHandler = async ({ params }) => {
 			}
 
 			const productSizeName = await tx.select({
+										id: product_size.id,
 									    size_id: product_size.size_id,
 										size: size.size,
 										price: product_size.price,

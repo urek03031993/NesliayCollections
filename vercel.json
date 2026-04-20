@@ -1,6 +1,6 @@
 {
   "buildCommand": "pnpm run build",
-  "installCommand": "pnpm install",
+  "installCommand": "pnpm add",
   "framework": "sveltekit",
   "regions": ["iad1"]
 }

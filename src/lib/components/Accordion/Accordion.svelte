@@ -1,5 +1,4 @@
 <script lang="ts">
-	// Props para personalizar
 	let { title = '', open = $bindable(false), children } = $props();
 
 	function toggle() {
