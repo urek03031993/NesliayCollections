@@ -9,7 +9,7 @@ import type { SizeDto } from '$lib/server/types/Dto';
 export const GET: RequestHandler = async ({ params }) => {
 	try {		
 		const result = await db.query.size.findFirst({
-			where: eq(size?.id, parseInt(params.id))
+			where: eq(size.id, parseInt(params.id))
 		});
 
 		if (!result) {

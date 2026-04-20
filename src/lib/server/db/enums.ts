@@ -2,14 +2,16 @@ import { pgEnum } from 'drizzle-orm/pg-core';
 
 export const sizeTypeEnum = pgEnum('size_type', ['child', 'adult']);
 
+export const productCategoryTypeEnum = pgEnum('product_category', [
+    'mommy_and_me',
+    'boys',
+    'girls',
+]);
+
 export const rentalStatusEnum = pgEnum('rental_status', [
     'draft',
-    'confirmed',
-    'in_process',
-    'submitted',
-    'returned',
-    'completed',
-    'overdue',
+    'prebook',
+    'reserved',
     'cancelled'
 ]);
 

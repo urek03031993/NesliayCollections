@@ -6,12 +6,12 @@ import {
 	image,
 	size,
 	product_size,
-	// client,
-	// categorie,
+	client,
 	rental,
+	payment_orders,
+	// categorie,
 	// rental_items,
 	// reservations_calendar,
-	// payment_orders,
 	// rental_history,
 } from '../db/schema';
 
@@ -20,12 +20,14 @@ import {
 // TIPOS DE ENUMS
 // ==========================================
 export type SizeType = 'child' | 'adult';
-export type RentalStatus = 'borrador' | 'confirmado' | 'en_proceso' | 'entregado' | 'devuelto' | 'completado' | 'atrasado' | 'cancelado';
-export type PaymentOrderStatus = 'pendiente' | 'confirmado' | 'reembolsado' | 'fallido';
-export type GuaranteeStatus = 'pendiente' | 'retenida' | 'devuelta' | 'parcialmente_devuelta';
-export type PaymentType = 'alquiler' | 'garantia' | 'reembolso' | 'ajuste';
-export type PaymentMethod = 'tarjeta_credito' | 'tarjeta_debito' | 'transferencia' | 'efectivo' | 'paypal' | 'mercadopago' | 'otro';
-export type ReservationType = 'alquiler' | 'mantenimiento' | 'bloqueo_manual' | 'limpieza';
+export type ProductCategory = 'mommy_and_me' | 'boys' | 'girls';
+export type RentalStatus = 'draft' | 'prebook' | 'reserved' | 'cancelled';
+
+// export type PaymentOrderStatus = 'pendiente' | 'confirmado' | 'reembolsado' | 'fallido';
+// export type GuaranteeStatus = 'pendiente' | 'retenida' | 'devuelta' | 'parcialmente_devuelta';
+// export type PaymentType = 'alquiler' | 'garantia' | 'reembolso' | 'ajuste';
+// export type PaymentMethod = 'tarjeta_credito' | 'tarjeta_debito' | 'transferencia' | 'efectivo' | 'paypal' | 'mercadopago' | 'otro';
+// export type ReservationType = 'alquiler' | 'mantenimiento' | 'bloqueo_manual' | 'limpieza';
 
 
 // ==========================================
@@ -37,9 +39,9 @@ export type Image = InferSelectModel<typeof image>;
 export type Product = InferSelectModel<typeof product>;
 export type ProductSize = InferSelectModel<typeof product_size>;
 export type Rental = InferSelectModel<typeof rental>;
-// export type RentalItem = InferSelectModel<typeof rental_items>;
+export type Client = InferSelectModel<typeof client>;
+export type PaymentOrder = InferSelectModel<typeof payment_orders>;
 // export type ReservationsCalendar = InferSelectModel<typeof reservations_calendar>;
-// export type PaymentOrder = InferSelectModel<typeof payment_orders>;
 // export type RentalHistory = InferSelectModel<typeof rental_history>;
 // export type Configuration = InferSelectModel<typeof configuration>;
 
@@ -53,9 +55,10 @@ export type NewImage = InferInsertModel<typeof image>;
 export type NewProduct = InferInsertModel<typeof product>;
 export type NewProductSize = InferInsertModel<typeof product_size>;
 export type NewRental = InferInsertModel<typeof rental>;
+export type NewClient = InferInsertModel<typeof client>;
+export type NewPaymentOrder = InferInsertModel<typeof payment_orders>;
 // export type NewRentalItem = InferInsertModel<typeof rental_items>;
 // export type NewReservationsCalendar = InferInsertModel<typeof reservations_calendar>;
-// export type NewPaymentOrder = InferInsertModel<typeof payment_orders>;
 // export type NewRentalHistory = InferInsertModel<typeof rental_history>;
 // export type NewConfiguration = InferInsertModel<typeof configuration>;
 

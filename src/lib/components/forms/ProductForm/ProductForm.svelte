@@ -15,7 +15,7 @@
 	}: ProductForm = $props();
 </script>
 
-<form class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST">
+<form name="productForm" class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" data-netlify="true">
     <div class="space-y-1 md:col-span-12">
         <label for="name" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Name</label>
         <input class="bg-surface-container-low focus:ring-primary/20 font-headline placeholder:text-outline w-full rounded-lg border-none p-4 text-xl italic transition-all focus:ring-2"

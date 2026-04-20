@@ -2,16 +2,26 @@ import { db } from '$lib/server/index.js';
 import { json } from '@sveltejs/kit';
 import { image, product, product_size } from '$lib/server/db/schema.js';
 import type { RequestHandler } from './$types';
+import { Categories } from '$lib/interfaces';
+import { sql } from 'drizzle-orm/sql/sql';
 
 
-export const GET: RequestHandler = async () => {
-	try {	
+
+export const GET: RequestHandler = async ({ url }) => {
+	try {
+		
+		const category = url.searchParams.get('category');
+				
+		if(category && !(category in Categories)) return json('You must write an existing category', { status: 400 });
+
 		const products = await db.query.product.findMany({
+			where: category && (category in Categories) ? sql`${product.category} = ${category}` : undefined,
 			columns:{
 				id: true,
 				name: true,
 				description: true,
 				color: true,
+				category: true
 			},
 			with:{
 				sizes:{
@@ -46,6 +56,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		
 		const data = await request.json();
 
+		console.log(data, 'server')
+
 		const transactionResult = await db.transaction(
 			async(tx) => {
 
@@ -53,6 +65,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 					name: data.name,
 					description: data.description,				
 					color: data.color,
+					category: data.category,
 					activo: true,
 				}).returning();
 

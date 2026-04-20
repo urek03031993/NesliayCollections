@@ -351,7 +351,7 @@
 				</button>
 			</div>
 			
-			<form onsubmit={addRental}  class="space-y-4" >
+			<form onsubmit={addRental}  class="space-y-4">
 				<div>
 					<label for="" class="block text-sm font-medium text-gray-700 mb-1">Nombre / Cliente</label>
 					<input 

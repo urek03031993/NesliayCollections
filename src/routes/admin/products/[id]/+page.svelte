@@ -23,14 +23,11 @@
     <div class="max-w-5xl mx-auto">
         <div class="mb-12">
             <h1 class="font-notoSerif text-4xl lg:text-5xl tracking-tight text-on-surface mb-2">
-                New Dress
-            </h1>
-            <p class="text-on-surface-variant font-body">
-                Adding a new size to the Collection.
-            </p>
+                { data.name }
+            </h1>            
         </div>
 
-        <form class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST">
+        <form name="productEditForm" class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" data-netlify="true">
             <div class="space-y-1 md:col-span-12">
                 <label for="name" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Name</label>
                 <input class="bg-surface-container-low focus:ring-primary/20 font-headline placeholder:text-outline w-full rounded-lg border-none p-4 text-xl italic transition-all focus:ring-2"
@@ -39,8 +36,8 @@
 
             <div class="space-y-8 md:col-span-7">
                 <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed p-1">
-                    <div class="z-10 px-6 text-center">
-                        <span class="material-symbols-outlined text-primary mb-4 text-5xl">cloud_upload</span>
+                    <div class="z-10 px-6 text-center justify-items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload-icon lucide-cloud-upload text-primary mb-4 text-5xl"><path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/></svg>
                         <p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
                         <p class="text-on-surface-variant font-body mt-2 text-sm">
                             High-resolution portrait recommended (4:5 ratio)
@@ -89,6 +86,19 @@
 
                     <div class="space-y-2">
                         <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
+                            Category
+                        </label>
+                        <select class="bg-surface-container-low focus:ring-primary/20 font-body w-full rounded-lg border-none p-4 transition-all focus:ring-2"
+                                id="category" name="category" bind:value={ data.category }>
+                            <option value="mommy_and_me">Mommy and Me</option>
+                            <option value="boys">Boys</option>
+                            <option value="girls">Girls</option>
+                        </select>
+                    </div>
+
+
+                    <div class="space-y-2">
+                        <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                             Rental Price (USD)
                         </label>
                         <div class="relative">
@@ -118,7 +128,7 @@
                         <label class="group flex cursor-pointer items-center">
                             <div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
                                 <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" />
-                                <span class="material-symbols-outlined text-primary scale-0 text-xs transition-transform peer-checked:scale-100">check</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
                             </div>
                             <span class="font-body text-on-surface ml-3 text-sm">Active</span>
                         </label>				

@@ -4,12 +4,12 @@ import {
 	image,
 	size,
 	product_size,
-	// client,
-	// categorie,
 	rental,
 	rental_items,
+	client,
+	payment_orders,
+	// categorie,
 	// reservations_calendar,
-	// payment_orders,
 	// rental_history,
 } from './schema.ts';
 
@@ -49,8 +49,12 @@ export const product_size_relations = relations(product_size, ({ one }) => ({
 );
 
 
-export const rental_relations = relations(rental, ({ many }) => ({		
-		items: many(rental_items)		
+export const rental_relations = relations(rental, ({ many, one }) => ({		
+		items: many(rental_items),		
+		client: one(client, {
+			fields: [rental.clientId],
+			references: [client.id],
+		}),
 	})
 );
 
@@ -63,6 +67,15 @@ export const rental_items_relations = relations(rental_items, ({ one }) => ({
 		product_size: one(product_size, {
 			fields: [rental_items.rental_id],
 			references: [product_size.id],
+		}),
+	})
+);
+
+
+export const payment_orders_relations = relations(payment_orders, ({ one }) => ({		
+		rental: one(rental, {
+			fields: [payment_orders.rental_id],
+			references: [rental.id],
 		}),
 	})
 );
