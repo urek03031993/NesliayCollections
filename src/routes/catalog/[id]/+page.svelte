@@ -23,7 +23,6 @@
 	});
 
 	function addDress(){
-		console.log('Selected size index:', size_index);
 		if ( current_size ){
 			cart.addItem({
 				id: data.product.id,
@@ -50,7 +49,6 @@
 		// 	url: data.product.images.length > 0 ? data.product.images[0].url : '',
 		// 	shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
 		// });	
-		console.log('Current cart items:', $cart);
 	}	
 
 	let initialRentals = [

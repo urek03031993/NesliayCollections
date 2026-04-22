@@ -94,7 +94,6 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 		if (!cookies.get('session')) {
 			return json({ error: 'Unauthorized' }, { status: 401 });
 		}
-		console.log(params.id, parseInt(params.id))
 
 		const result = await db.delete(product)
 								.where(eq(product.id, parseInt(params.id)))

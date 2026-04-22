@@ -43,5 +43,5 @@ export function isValidRentalPeriod(startDate: Date, endDate: Date): boolean {
 	const diffTime = Math.abs(finalDate.getTime() - initialDate.getTime());
 	const diffDays = diffTime / (1000 * 60 * 60 * 24);
 
-	return diffDays > 2;
+	return diffDays > 4;
 };
