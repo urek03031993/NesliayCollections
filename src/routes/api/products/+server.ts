@@ -56,8 +56,6 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		
 		const data = await request.json();
 
-		console.log(data, 'server')
-
 		const transactionResult = await db.transaction(
 			async(tx) => {
 

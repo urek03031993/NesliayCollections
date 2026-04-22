@@ -11,7 +11,6 @@ function shoppingCar(){
     const { update, subscribe, set } = writable<ShoppingCarItem[]>([]);
 
 	if (browser) {
-		console.log('carga automatica')
 		const stored = localStorage.getItem(storageKey);
 		if (stored) {
 			try {

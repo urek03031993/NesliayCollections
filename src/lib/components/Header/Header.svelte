@@ -24,7 +24,7 @@
             <NavLink href={ resolve('/') } text='Home'/>
             <NavLink href={ resolve('/catalog')} text='Catalog'/>
             <NavLink href={ resolve('/collections')} text='Collections'/>
-            <NavLink text='Contact'/>                
+            <NavLink href={ resolve('/contact')} text='Contact'/>                
         </div>
 
         <div class="flex items-center gap-6">

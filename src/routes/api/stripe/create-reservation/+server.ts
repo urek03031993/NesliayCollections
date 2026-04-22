@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
                  email, name, last_name, phone, document_type, identification_document }: paymentIntentRequest = await request.json();
 
         if (!termsAccepted) error(400, 'You must accept the terms and conditions');
-        if (isValidRentalPeriod(startDate, endDate)) error(400, 'The rental period must be less than 3 days');
+        if (isValidRentalPeriod(startDate, endDate)) error(400, 'The rental period must be less than 5 days');
 
         let customer;
         const rentalId = uuidv4();

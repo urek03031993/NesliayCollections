@@ -7,7 +7,7 @@ export const handle: Handle = async ({ event, resolve }) => {
         const authenticated = event.cookies.get('session');               
 
         if ( authenticated === undefined ){
-            throw redirect(303, '/');
+            redirect(303, '/');
         }       
     }
     

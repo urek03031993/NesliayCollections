@@ -18,6 +18,7 @@ export const load: PageServerLoad = async({ params, fetch }) => {
 export const actions = {
     default: async ({ request, fetch }) => {
         const formData = await request.formData();
+        formData.set('activo', formData.get('activo') ? 'true' : 'false');
 
         const body: Partial<CreateProduct> = buildRequestBody(formData)
 

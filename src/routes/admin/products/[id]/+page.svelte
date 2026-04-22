@@ -127,7 +127,7 @@
                     <div class="space-y-3">
                         <label class="group flex cursor-pointer items-center">
                             <div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
-                                <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" />
+                                <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" name="activo" />
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
                             </div>
                             <span class="font-body text-on-surface ml-3 text-sm">Active</span>

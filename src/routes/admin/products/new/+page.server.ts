@@ -1,4 +1,4 @@
-import { fail } from "@sveltejs/kit";
+import { fail, json } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import type { Size } from "$lib/server/types/models";
 import { buildImageName, buildRequestBody, buildSlug } from "$lib/utils/utils";
@@ -17,6 +17,7 @@ export const load: PageServerLoad = async({ fetch }) => {
 export const actions = {
     default: async ({ request, fetch }) => {
         const formData = await request.formData();
+        formData.set('activo', formData.get('activo') ? 'true' : 'false');
         const file = formData.get('images');
         const body = buildRequestBody(formData);  
 
@@ -26,33 +27,28 @@ export const actions = {
             const fileName = buildImageName(file.name);
 
             const { data, error } = await supabase.storage
-                .from('NesliayCollections')
+                .from('NeliayCollection')
                 .upload(fileName, buffer, {
                     contentType: file.type
                 });
 
             if (error) {
-                console.log(error);
+                return json({ error: 'Error uploading file' }, { status: 500 });
             }
 
             if(data){
-                console.log('Foto subida con éxito');
                 body['file_name'] = fileName
                 body['short_description'] = buildSlug(formData.get('name') as string ?? 'no_name', formData.get('color')  as string ?? 'false')
-                console.log(data.path)
             }           
 
-            const { data: urlData } = supabase.storage.from('NesliayCollections').getPublicUrl(fileName);
+            const { data: urlData } = supabase.storage.from('NeliayCollection').getPublicUrl(fileName);
             
             if(urlData){
                 body['url'] = urlData.publicUrl ?? file.name
-                console.log('Url publica foto');
             }else{
                 body['url'] = file.name
             }
         }
-
-        console.log(body, 'cliente server')
 
         const response = await fetch('/api/products', {
             method: 'POST',
