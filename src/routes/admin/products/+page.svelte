@@ -46,7 +46,7 @@
 				/>
 			</div> -->
 			<button class="bg-tertiary text-on-tertiary flex items-center space-x-2 rounded-full px-6 py-2 font-medium shadow-lg transition-all hover:brightness-110"
-                    onclick={()=>{goto(resolve('/admin/products/new'))}}>
+                    onclick={()=>{ goto(resolve('/admin/products/new')) }}>
 				<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
 				<span>New Dress</span>
 			</button>

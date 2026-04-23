@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { goto } from "$app/navigation";
 	import { resolve } from "$app/paths";
 	import Header from "$lib/components/Header/Header.svelte";
 	import MobileNav from "$lib/components/MobileNav/MobileNav.svelte";
@@ -7,7 +6,6 @@
 	import boys from '$lib/assets/product/images/boys.jpeg'
 	import mommy_and_me from '$lib/assets/product/images/mommy_and_me.jpeg'
 	import girls from '$lib/assets/product/images/girls.jpeg'
-
 </script>
 
 <Header />
@@ -37,10 +35,17 @@
 						loading="lazy"         
 					/>
 					<div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
-					<button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+					<!-- <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
 							onclick={()=>{ goto(resolve(`/collections/boys`))}}>
 						Go To
-					</button>
+					</button> -->
+					<a class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full px-8 py-3 text-sm font-semibold backdrop-blur-md transition-all duration-300
+								opacity-100 translate-y-0
+								[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:translate-y-4 
+								group-hover:translate-y-0 group-hover:opacity-100"
+							href={ resolve(`/collections/boys`) }>
+						Go To
+					</a>
 				</div>
 				<div class="flex items-start justify-between px-2">
 					<div>
@@ -61,10 +66,17 @@
 						loading="lazy"         
 					/>
 					<div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
-					<button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+					<!-- <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
 							onclick={()=>{ goto(resolve(`/collections/mommy_and_me`))}}>
 						Go To
-					</button>
+					</button> -->
+					<a class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full px-8 py-3 text-sm font-semibold backdrop-blur-md transition-all duration-300
+								opacity-100 translate-y-0
+								[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:translate-y-4 
+								group-hover:translate-y-0 group-hover:opacity-100"
+							href={ resolve(`/collections/mommy_and_me`) }>
+						Go To
+					</a>
 				</div>
 				<div class="flex items-start justify-between px-2">
 					<div>
@@ -85,10 +97,17 @@
 						loading="lazy"         
 					/>
 					<div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
-					<button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
+					<!-- <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
 							onclick={()=>{ goto(resolve(`/collections/girls`))}}>
 						Go To
-					</button>
+					</button> -->
+					<a class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 rounded-full px-8 py-3 text-sm font-semibold backdrop-blur-md transition-all duration-300
+								opacity-100 translate-y-0
+								[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:translate-y-4 
+								group-hover:translate-y-0 group-hover:opacity-100"
+							href={ resolve(`/collections/girls`) }>
+						Go To
+					</a>
 				</div>
 				<div class="flex items-start justify-between px-2">
 					<div>
@@ -98,8 +117,6 @@
 					<!-- <span class="text-primary text-xl font-semibold">${ from_price }</span> -->
 				</div>
 			</article>
-
-
 
 		</div>
 	</div>
