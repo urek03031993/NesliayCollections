@@ -52,7 +52,7 @@ export interface ProductSizesInfo {
 	size: string;
 	price: number;
 	quantity: number;
-	available_quantity?: number;
+	available_quantity: number;
 	reserved_quantity?: number;
 }
 
