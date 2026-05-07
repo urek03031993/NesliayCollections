@@ -6,7 +6,7 @@
 	import { Elements, PaymentElement } from 'svelte-stripe';
 	import { cart, cartTotal } from '$lib/stores/store';
 
-	let { startDate, endDate, rentalAgreement } = $props(); 
+	let { startDate, endDate, rentalAgreement, action } = $props(); 
 
 	let stripe = $state<Stripe | null>();
 	let clientSecret = $state<string | null>(null);
@@ -20,7 +20,6 @@
 	let phone = $state();
 	let document_type = $state();
 	let identification_document = $state();
-	// let rentalId = $state<string>();
 
 	let clientDataValid = $derived.by(() => {
 		return !name || !last_name || !email || !identification_document
@@ -34,7 +33,19 @@
 	async function createPaymentIntent(event: SubmitEvent) {
 		event.preventDefault();
 
-		const response = await fetch('/api/stripe/create-reservation', {
+		if(!name || !last_name || !email || !identification_document) return;
+
+		let stripeEndpoint;
+
+		if( action === 'pre_book') {
+			stripeEndpoint = 'create-pre-booking';
+		} else if (action === 'reserve') {
+			stripeEndpoint = 'create-reservation';
+		}
+
+		processing = true;
+
+		const response = await fetch(`/api/stripe/${stripeEndpoint}`, {
 			method: 'POST',
 			headers: {
 				'content-type': 'application/json'
@@ -57,6 +68,8 @@
 		const json_response = await response.json();
 
 		clientSecret = json_response.clientSecret
+
+		processing = false;
 	}
 
 
@@ -138,7 +151,13 @@
         <div class="flex justify-end">
             <button class="px-5 py-2.5 rounded-2xl font-bold text-white justify-end disabled:opacity-50 disabled:cursor-not-allowed"
                 style="background: linear-gradient(to right, #735c00, #d4af37);"
-                type="submit" disabled={ clientDataValid } >Acept</button>        
+                type="submit" disabled={ clientDataValid && !processing } >
+				{#if processing}
+                    Processing...
+                {:else}
+                    Acept
+                {/if}				
+			</button>        
         </div>
 	</form>
 {/if}

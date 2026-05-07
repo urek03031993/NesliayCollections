@@ -1,10 +1,12 @@
 import type { Actions, PageServerLoad } from "./$types";
 import type { Product } from "$lib/server/types/models";
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 
 
 export const load: PageServerLoad = async({ fetch }) => {
     const response = await fetch(`/api/products`);
+
+    if (!response.ok) return error(response.status, 'Failed to fetch products');       
     
     const products: Product[] = await response.json();
 

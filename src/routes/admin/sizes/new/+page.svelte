@@ -16,6 +16,10 @@
 
 <AdminSidebar/>
 
+{#if form?.errors }    
+    <p class="text-red-600">{ form?.errors }</p>
+{/if}
+
 <main class="pt-24 lg:pl-72 pb-20 px-6 lg:px-12 min-h-screen">
     <div class="max-w-5xl mx-auto">
         <div class="mb-12">
@@ -54,8 +58,6 @@
                 </button>
             </div>    
         </form>
-
-
     </div>
 </main>
 

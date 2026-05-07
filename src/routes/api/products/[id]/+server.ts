@@ -3,8 +3,34 @@ import { db } from '$lib/server/index.js';
 import { eq } from 'drizzle-orm';
 import { image, product, product_size, size } from '$lib/server/db/schema';
 import type { RequestHandler } from './$types';
+import type { ProductCategory } from '$lib/server/types/models';
 
-import type { UpdateProductDto } from '$lib/server/types/Dto.js';
+interface ProductSizes {
+	id: number; 
+	size_id: number; 
+	size: string;
+	price: number;
+	quantity: number;
+}
+
+
+interface ProductImage {
+	id: number;
+	url: string;
+	short_description: string;
+}
+
+
+interface Product {
+	id: number;
+	name: string;
+	slug: string;
+	description?: string;
+	color: string;
+	category: ProductCategory;
+	sizes: ProductSizes[];
+	images: ProductImage[];
+}
 
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -18,7 +44,8 @@ export const GET: RequestHandler = async ({ params }) => {
 					name: true,
 					description: true,
 					color: true,
-					category: true
+					category: true,
+					activo: true
 				}				
 			});
 
@@ -31,7 +58,9 @@ export const GET: RequestHandler = async ({ params }) => {
 									    size_id: product_size.size_id,
 										size: size.size,
 										price: product_size.price,
+										quantity: product_size.quantity,
 										available_quantity: product_size.available_quantity,
+										reserved_quantity: product_size.reserved_quantity
 									})
 									.from(product_size)
 									.innerJoin(size, eq(product_size.size_id, size.id))
@@ -69,18 +98,40 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 			return json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const body: UpdateProductDto = await request.json();		
+		const body: Product = await request.json();
 
-		const update = await db.update(product)
-								.set(body)
-								.where(eq(product.id, parseInt(params.id)))
-								.returning();
+		const transaction = await db.transaction( async(tx) => {
+
+			const productUpdate = await tx.update(product)
+									.set({ name: body.name, description: body.description, color: body.color, category: body.category })
+									.where(eq(product.id, parseInt(params.id)))
+									.returning();
 		
-		if (!update) {
-			return json({ error: 'Product not found' }, { status: 404 });
-		}
+			if (!productUpdate) {
+				return json({ error: 'Product not found' }, { status: 404 });
+			}
 
-		return json( update[0], { status: 200 });
+			await tx.delete(product_size).where(eq(product_size.product_id, parseInt(params.id)));
+	
+			const sizesUpdate = await tx.insert(product_size).values(
+				body.sizes.map((size: { size_id: number, size: string; price: number; quantity: number }) => ({
+					product_id: productUpdate[0].id,
+					size_id: size.size_id,
+					price: size.price.toString(),
+					quantity: size.quantity,
+				}))).returning();
+
+			if (!sizesUpdate) {
+				return json({ error: 'Product not found' }, { status: 404 });
+			}
+
+			return { productUpdate, sizesUpdate }
+		});
+
+
+		if (!transaction) return json({ error: 'Product not updated' }, { status: 404 });		
+
+		return json({ success: true }, { status: 200 });
 
 	} catch (error) {
 		console.error('Error updating product:', error);

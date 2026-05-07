@@ -2,7 +2,7 @@ import { fail, json } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import type { Size } from "$lib/server/types/models";
 import { buildImageName, buildRequestBody, buildSlug } from "$lib/utils/utils";
-import { supabase } from "$lib/supabase/supabase";
+import { getPublicUrlSupabase, uploadDressImage } from "$lib/supabase/supabase";
 
 
 export const load: PageServerLoad = async({ fetch }) => {
@@ -18,35 +18,26 @@ export const actions = {
     default: async ({ request, fetch }) => {
         const formData = await request.formData();
         formData.set('activo', formData.get('activo') ? 'true' : 'false');
+        const jsonSizes = JSON.parse( formData.get('jsonSizes') as string ?? '' );
         const file = formData.get('images');
-        const body = buildRequestBody(formData);  
+        const body = buildRequestBody(formData);
+        body['sizes'] = jsonSizes;
 
 
         if (file && (file instanceof File)){
             const buffer = await file.arrayBuffer();
             const fileName = buildImageName(file.name);
 
-            const { data, error } = await supabase.storage
-                .from('NeliayCollection')
-                .upload(fileName, buffer, {
-                    contentType: file.type
-                });
+            const { data, error } = await uploadDressImage(fileName, buffer, file.type);
 
-            if (error) {
-                return json({ error: 'Error uploading file' }, { status: 500 });
-            }
+            if (error) return json('Error uploading file', { status: 500 });
 
             if(data){
                 body['file_name'] = fileName
                 body['short_description'] = buildSlug(formData.get('name') as string ?? 'no_name', formData.get('color')  as string ?? 'false')
-            }           
 
-            const { data: urlData } = supabase.storage.from('NeliayCollection').getPublicUrl(fileName);
-            
-            if(urlData){
-                body['url'] = urlData.publicUrl ?? file.name
-            }else{
-                body['url'] = file.name
+                const urlData = getPublicUrlSupabase(fileName);            
+                body['url'] = urlData.publicUrl ?? file.name;
             }
         }
 
