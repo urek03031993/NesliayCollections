@@ -71,12 +71,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 					throw new Error('Failed to create product')
 				}
 
-				const insertedProductSize = await tx.insert(product_size).values({
-					product_id: insertedProduct[0].id,
-					size_id: data.size_id,
-					price: data.price,               
-					quantity: data.quantity,
-				}).returning();
+				const insertedProductSize = await tx.insert(product_size).values(
+					data.sizes.map((size: { size_id: number, size: string; price: number; quantity: number }) =>	({
+						product_id: insertedProduct[0].id,
+						size_id: size.size_id,
+						price: size.price,               
+						quantity: size.quantity,
+					}))).returning();
 
 				if(!insertedProductSize){
 					throw new Error('Failed to link product with his size')

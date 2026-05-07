@@ -1,29 +1,69 @@
-import { fail } from "@sveltejs/kit";
+import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { resolve } from "$app/paths";
 import { buildRequestBody } from "$lib/utils/utils";
-import type { CreateProduct } from "$lib/components/forms/ProductForm/interfaces";
-import type { ProductWithSizesInfo } from "$lib/server/types/Dto";
+import type { ProductCategory, Size } from "$lib/server/types/models";
+
+
+interface ProductSizes {
+    id: number; 
+    size_id: number; 
+    size: string;
+    price: number;
+    quantity: number;
+}
+
+
+interface ProductImage {
+    id: number;
+    url: string;
+    short_description: string;
+}
+
+
+interface Product {
+    id: number;
+    name: string;
+    slug: string;
+    description?: string;
+    color: string;
+    category: ProductCategory;
+    sizes: ProductSizes[];
+    images: ProductImage[];
+}
 
 
 export const load: PageServerLoad = async({ params, fetch }) => {
-    const responseProduct = await fetch(`/api/products/${params.id}`)
+    const responseProduct = await fetch(`/api/products/${params.id}`);
+    const responseSizes = await fetch(`/api/size`);        
 
-    const product: ProductWithSizesInfo = await responseProduct.json()
+    const product: Product = await responseProduct.json();
+    const sizes: Size[] = await responseSizes.json();
 
-    return product   
+    if ( !responseProduct.ok ) {
+        return error(404, 'Failed to fetch product');
+    }
+
+    if ( !responseSizes.ok ) {
+        return error(404, 'Failed to fetch sizes');
+    }   
+
+    return { product, sizes }   
 };
 
 
 export const actions = {
-    default: async ({ request, fetch }) => {
-        const formData = await request.formData();
-        formData.set('activo', formData.get('activo') ? 'true' : 'false');
+    default: async ({ request, params, fetch }) => {
+        const formData = await request.formData();        
+        const jsonSizes = JSON.parse( formData.get('jsonSizes') as string ?? '' )
+        // const file = formData.get('images');        
 
-        const body: Partial<CreateProduct> = buildRequestBody(formData)
+        const body = buildRequestBody(formData);
+        body['activo'] = formData.get('activo') ? true : false;
+        body['sizes'] = jsonSizes;
 
-        const response = await fetch(resolve('/api/products'), {
-            method: 'POST',
+        const response = await fetch(resolve(`/api/products/${params.id}`), {
+            method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'same-origin',            
             body: JSON.stringify(body)

@@ -40,17 +40,20 @@ export interface RentalDto {
 }
 
 
-export interface ProductSizesInfo {
-	id: number; 
-	size_id: number; 
-	size: string;
-	price: number; 
-	available_quantity: number;
-}
 
 
 export interface ProductSizesPriceInfo {
 	price: string; 
+}
+
+export interface ProductSizesInfo {
+	id: number; 
+	size_id: number; 
+	size: string;
+	price: number;
+	quantity: number;
+	available_quantity?: number;
+	reserved_quantity?: number;
 }
 
 export interface ProductImageInfo {

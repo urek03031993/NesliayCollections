@@ -54,17 +54,22 @@ export const POST: RequestHandler = async ({ request }) => {
         }        
 
         const paymentIntent = await stripeConnection.paymentIntents.create({
-            amount: amounts.totalWithTax * 100,
+            amount: amounts.deposit * 100,
             currency: 'usd',
             customer: customer.id,
+            // capture_method: 'manual',
+            setup_future_usage: 'off_session',
+            automatic_payment_methods: { enabled: true },
             metadata: {
                 rentalId: rentalId,
                 payment_phase: 'deposit_hold',
                 base_price: amounts.basePrice * 100,
+                deposit_amount: amounts.deposit * 100,
+                expected_final_payment: amounts.finalPayment * 100,
                 tax_amount: amounts.tax * 100,
                 terms_accepted: termsAccepted.toString()
             },
-            description: `Sign for rental dress ${rentalId} - $${amounts.totalWithTax}`
+            description: `Sign to prebook dress ${rentalId} - $${amounts.deposit}`
         });
 
         if (!paymentIntent) {
@@ -105,7 +110,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 subtotal: amounts.basePrice.toString(),
                 tax_amount: amounts.tax.toString(),
                 total: amounts.totalWithTax.toString(),
-                state: 'reserved',
+                state: 'prebook',
             }).returning();
 
             if(!insertRental){

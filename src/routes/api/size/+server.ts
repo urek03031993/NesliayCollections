@@ -7,17 +7,16 @@ import type { SizeDto } from '$lib/server/types/Dto';
 
 
 export const GET: RequestHandler = async () => {
-	try {		
+	try {
 		const sizes = await db.select({
 			id: size.id,
 			size: size.size,
 			height: size.height,
-		}).from(size)
+		}).from(size);
 		
 		return json( sizes , { status: 200 });
-
+		
 	} catch (error) {
-
 		console.error('Error fetching sizes:', error);
 		return json('Failed to fetch sizes', { status: 500 });
 	}
@@ -36,10 +35,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			height: data.height
 		}).returning();
 		
-		return json({ insertedSize }, { status: 201 });
+		return json( insertedSize , { status: 201 });
 
 	} catch (error) {
-
 		console.error('Error creating size:', error);
 		return json('Failed to create size', { status: 500 });
 	}

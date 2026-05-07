@@ -8,7 +8,7 @@
 	let { data }: PageProps = $props();
 
 	let delete_id: number = $state(0);
-	let open_delete: boolean = $state(false) 
+	let open_delete: boolean = $state(false);
 
 	function edit_button(id: number){
     	goto(resolve(`/admin/products/${id}`));
@@ -34,17 +34,7 @@
 				The best dresses for the best occasions.
 			</p>
 		</div>
-		<div class="flex items-center space-x-4">
-			<!-- <div class="relative">
-				<span class="material-symbols-outlined text-on-surface-variant absolute top-1/2 left-3 -translate-y-1/2 text-xl">
-                    search
-                </span>
-				<input
-					class="bg-surface-container-lowest focus:ring-primary-container w-64 rounded-xl border-none py-2 pr-4 pl-10 text-sm shadow-sm focus:ring-2"
-					placeholder="Search archive..."
-					type="text"
-				/>
-			</div> -->
+		<div class="flex items-center space-x-4">			
 			<button class="bg-tertiary text-on-tertiary flex items-center space-x-2 rounded-full px-6 py-2 font-medium shadow-lg transition-all hover:brightness-110"
                     onclick={()=>{ goto(resolve('/admin/products/new')) }}>
 				<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>

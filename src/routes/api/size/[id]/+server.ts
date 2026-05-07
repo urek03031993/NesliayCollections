@@ -31,11 +31,11 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 			return json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const body: Partial<SizeDto> = await request.json();		
+		const body: Partial<SizeDto> = await request.json();
 
 		const update = await db.update(size)
 								.set(body)
-								.where(eq(size.id, parseInt(params.id)))
+								.where( eq(size.id, parseInt(params.id)) )
 								.returning();
 		
 		if (!update) {

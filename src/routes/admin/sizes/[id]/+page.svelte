@@ -5,7 +5,7 @@
 	import { enhance } from "$app/forms";
 	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";
     
-    let { form, data }: PageProps = $props();
+    let { data, form }: PageProps = $props();
     
     $effect.pre(()=>{
         if(form?.success) {
@@ -16,12 +16,8 @@
 
 <AdminSidebar/>
 
-{#if form?.success }    
-    {goto(resolve('/admin/sizes'))} 
-{/if}
-
 {#if form?.errors }    
-    <p>{ form?.errors }</p>    
+    <p class="text-red-600">{ form?.errors }</p>    
 {/if}
 
 <main class="pt-24 lg:pl-72 pb-20 px-6 lg:px-12 min-h-screen">

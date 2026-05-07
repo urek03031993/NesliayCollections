@@ -12,6 +12,7 @@
 	let startDate: Date | undefined = $state();
 	let endDate: Date | undefined = $state();
 	let rentalAgreement: boolean = $state(false);
+	let action = $state<'pre_book' | 'reserve'>();
 
 	let invalidRentalDays = $derived.by(() => {		
 		if (!startDate || !endDate) return false;
@@ -22,6 +23,16 @@
 	let validCheckout = $derived.by(() => {
 		return !invalidRentalDays && rentalAgreement;
 	});
+
+	function preBook() {
+		showModal = true;
+		action = 'pre_book';
+	}
+
+	function reserve() {
+		showModal = true;
+		action = 'reserve';
+	}
 </script>
 
 <Header />
@@ -101,15 +112,25 @@
 										<a href={ asset('/Neliay_Collection_LLC_Agreement.pdf') } target="_blank" class="underline" rel="noopener noreferrer">Neliay Collections Rental Agreement</a>
 									</span>
 								</label>				
-							</div>				
+							</div>
 
-							<button disabled = { !validCheckout } class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 mb-8 flex w-full items-center justify-center gap-3 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
+							<div class="grid grid-cols-2 gap-4 mb-8">	
+								<button disabled = { !validCheckout } class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 flex w-full items-center justify-center gap-1 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
 									style="background: linear-gradient(to right, #735c00, #d4af37);"
 									type="button"
-									onclick={()=>{ showModal = true }}>
-								<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-keyhole-icon lucide-lock-keyhole"><circle cx="12" cy="16" r="1"/><rect x="3" y="10" width="18" height="12" rx="2"/><path d="M7 10V7a5 5 0 0 1 10 0v3"/></svg>
-								Secure Checkout
-							</button>
+									onclick={()=>{ preBook() }}>
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-open-check-icon lucide-book-open-check"><path d="M12 21V7"/><path d="m16 12 2 2 4-4"/><path d="M22 6V4a1 1 0 0 0-1-1h-5a4 4 0 0 0-4 4 4 4 0 0 0-4-4H3a1 1 0 0 0-1 1v13a1 1 0 0 0 1 1h6a3 3 0 0 1 3 3 3 3 0 0 1 3-3h6a1 1 0 0 0 1-1v-1.3"/></svg>
+									Pre-Book
+								</button>
+
+								<button disabled = { !validCheckout } class="bg-primary-gradient text-on-primary font-manrope shadow-primary/10 flex w-full items-center justify-center gap-1 rounded-full py-5 text-sm font-extrabold tracking-[0.2em] uppercase shadow-xl transition-all hover:opacity-90 active:scale-95 disabled:opacity-60"
+										style="background: linear-gradient(to right, #735c00, #d4af37);"
+										type="button"
+										onclick={()=>{ reserve() }}>
+									<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-book-check-icon lucide-book-check"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/><path d="m9 9.5 2 2 4-4"/></svg>
+									Reserve
+								</button>
+							</div>									
 						</form>
 						
 
@@ -161,6 +182,6 @@
 
 
 <Modal open={ showModal }>
-	<StripePaymentsForm { startDate } { endDate } { rentalAgreement }/>
+	<StripePaymentsForm { startDate } { endDate } { rentalAgreement } { action } />
 </Modal>
 
