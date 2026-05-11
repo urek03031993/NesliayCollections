@@ -1,37 +1,42 @@
 <script lang="ts">
 	import { resolve, asset } from '$app/paths';
 	import { cart, cartTotal } from '$lib/stores/store';
+	import Modal from '$lib/components/Modal/Modal.svelte';
+	import { isValidRentalPeriod } from '$lib/utils/utils';
 	import Header from '$lib/components/Header/Header.svelte';
 	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';	
-	import Modal from '$lib/components/Modal/Modal.svelte';
 	import StripePaymentsForm from '$lib/components/forms/StripePaymentForm/StripePaymentsForm.svelte';
-	import { isValidRentalPeriod } from '$lib/utils/utils';
+
 
 	let showModal: boolean = $state(false);
 	let cartItems: string = $derived(JSON.stringify($cart));
-	let startDate: Date | undefined = $state();
-	let endDate: Date | undefined = $state();
+	let startDate = <Date>$state();
+	let endDate = <Date>$state();
 	let rentalAgreement: boolean = $state(false);
-	let action = $state<'pre_book' | 'reserve'>();
+	let action = <'pre_book' | 'reserve'>$state();
 
-	let invalidRentalDays = $derived.by(() => {		
+	let validRentalDays = $derived.by(() => {		
 		if (!startDate || !endDate) return false;
 
 		return isValidRentalPeriod(startDate, endDate);
 	});
 
 	let validCheckout = $derived.by(() => {
-		return !invalidRentalDays && rentalAgreement;
+		return validRentalDays && rentalAgreement;
 	});
 
 	function preBook() {
-		showModal = true;
-		action = 'pre_book';
+		if (validCheckout) {
+			showModal = true;
+			action = 'pre_book';
+		}
 	}
 
 	function reserve() {
-		showModal = true;
-		action = 'reserve';
+		if (validCheckout) {
+			showModal = true;
+			action = 'reserve';
+		}
 	}
 </script>
 
@@ -81,8 +86,8 @@
 										/>
 									</div>									
 								</div>
-								{#if invalidRentalDays }
-									<p class="text-red-500 text-justify">La diferencia entre las fechas debe de ser menor a dos dias</p>	
+								{#if !validRentalDays && startDate && endDate}
+									<p class="text-red-500 text-justify">La diferencia entre las fechas debe de ser menor a cuatro dias</p>	
 								{/if}
 													
 								<div class="text-on-surface-variant flex justify-between">
