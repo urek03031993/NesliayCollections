@@ -10,8 +10,8 @@
 
 	let showModal: boolean = $state(false);
 	let cartItems: string = $derived(JSON.stringify($cart));
-	let startDate = <Date>$state();
-	let endDate = <Date>$state();
+	let startDate = $state<Date>();
+	let endDate = $state<Date>();
 	let rentalAgreement: boolean = $state(false);
 	let action = <'pre_book' | 'reserve'>$state();
 
@@ -186,7 +186,7 @@
 </main>
 
 
-<Modal open={ showModal }>
+<Modal bind:open = { showModal }>
 	<StripePaymentsForm { startDate } { endDate } { rentalAgreement } { action } />
 </Modal>
 

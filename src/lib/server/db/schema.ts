@@ -96,7 +96,7 @@ export const rental_items = pgTable('rental_items', {
     unit_price: decimal('unit_price', { precision: 10, scale: 2 }).notNull(),
     subtotal: decimal('subtotal', { precision: 10, scale: 2 }).notNull(),
     product_name: varchar('product_name', { length: 255 }),
-    size_size: varchar('size_size', { length: 10 }),
+    size_size: varchar('size_size', { length: 50 }),
     createdAt: timestamp('created_at').defaultNow(),
 });
 
@@ -104,7 +104,7 @@ export const rental_items = pgTable('rental_items', {
 export const payment_orders = pgTable('payment_orders', {
     id: serial('id').primaryKey(),
     rental_id: integer('rental_id').notNull().references(() => rental.id, { onDelete: 'cascade' }),
-    orderId: varchar('order_id', { length: 50 }).unique(),
+    orderId: varchar('order_id', { length: 50 }),
     customerId: varchar('customer_id').notNull(),
     state: paymentOrderStatusEnum('state').default('pending').notNull(),
     amount: decimal('amount', { precision: 10, scale: 2 }).notNull(),

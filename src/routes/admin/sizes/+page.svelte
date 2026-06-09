@@ -5,7 +5,7 @@
 	import ModallDelete from "$lib/components/ModalDelete/ModallDelete.svelte";
 	import type { PageProps } from "./$types";
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
 
 	let delete_id: number = $state(0);
 	let open_delete: boolean = $state(false);
@@ -34,18 +34,13 @@
 			<p class="text-on-surface-variant font-body mt-2 italic">
 				Curating the finest textures and silhouettes for the modern atelier.
 			</p>
+			{#if form?.error}
+				<p class="text-red-700 font-bold mt-2">
+					{ form.error.message }					
+				</p>				
+			{/if}			
 		</div>
 		<div class="flex items-center space-x-4">
-			<!-- <div class="relative">
-				<span class="material-symbols-outlined text-on-surface-variant absolute top-1/2 left-3 -translate-y-1/2 text-xl">
-                    search
-                </span>
-				<input
-					class="bg-surface-container-lowest focus:ring-primary-container w-64 rounded-xl border-none py-2 pr-4 pl-10 text-sm shadow-sm focus:ring-2"
-					placeholder="Search archive..."
-					type="text"
-				/>
-			</div> -->
 			<button class="bg-tertiary text-on-tertiary flex items-center space-x-2 rounded-full px-6 py-2 font-medium shadow-lg transition-all hover:brightness-110"
                     onclick={()=>{goto(resolve('/admin/sizes/new'))}}>
 				<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
@@ -54,8 +49,6 @@
 			</button>
 		</div>
 	</header>
-
-
 
 	<div class="bg-surface-container-low overflow-hidden rounded-3xl shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
 		<div class="overflow-x-auto">
@@ -111,8 +104,7 @@
                             </td>
                         </tr>
                     {/each}                    
-				</tbody>
-                
+				</tbody>                
 			</table>
 		</div>		
 	</div>

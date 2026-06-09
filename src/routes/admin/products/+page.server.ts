@@ -1,17 +1,18 @@
+import type { ProductCatalogList } from "$lib/server/types/Dto";
 import type { Actions, PageServerLoad } from "./$types";
-import type { Product } from "$lib/server/types/models";
 import { error, fail } from "@sveltejs/kit";
 
 
 export const load: PageServerLoad = async({ fetch }) => {
     const response = await fetch(`/api/products`);
 
-    if (!response.ok) return error(response.status, 'Failed to fetch products');       
+    if (!response.ok) error(response.status, 'Failed to fetch products');       
     
-    const products: Product[] = await response.json();
+    const products: ProductCatalogList[] = await response.json();
 
     return { products }
 };
+
 
 export const actions = {
     default: async ({ request, fetch }) => {

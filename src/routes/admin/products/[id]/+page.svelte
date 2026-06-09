@@ -4,13 +4,20 @@
 	import { resolve } from "$app/paths";
 	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";
 	import Modal from "$lib/components/Modal/Modal.svelte";
-	// import ProductImageUpload from "$lib/components/ProductImageUpload/ProductImageUpload.svelte";
+	import ProductImageUpload from "$lib/components/ProductImageUpload/ProductImageUpload.svelte";
+	import InputErrorText from "$lib/components/inputErrorText/inputErrorText.svelte";
+	import { toastStore } from "$lib/stores/store";
 	    
     let { data, form }: PageProps = $props();
 
-    $effect.pre( () => {
+    $effect.pre(()=>{
         if(form?.success) {
-            goto(resolve('/admin/products'))
+            toastStore.success("Vestido editado satisfactoriamente");
+            goto(resolve('/admin/products'));
+        }
+
+        if(form?.errors) {
+            toastStore.error("Ocurrio un error al editar el vestido revise por favor");
         }
     });
 
@@ -21,25 +28,26 @@
             size: size.size, 
             price: size.price, 
             quantity: size.quantity,
-        }))
+        }));
     });
+
 	let jsonSizes: string = $derived(JSON.stringify(sizesList));
 
-	async function addSize(event: Event): Promise<void> {
+    function addSize(event: Event): void {
 		event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
 
         const size_id = parseInt(formData.get('size_id') as string, 10);
-        const price = parseFloat(formData.get('price') as string);
         const size = data.sizes.find((s) => s.id === size_id)?.size || '';
+        const price = formData.get('price') as string || '0.00';
         const quantity = parseInt(formData.get('quantity') as string, 10);
 
-        const newSize = { size_id, size, price, quantity };
+        const newSize = { size_id: size_id, size: size, price: price, quantity: quantity };
         sizesList = [...sizesList, newSize];
         openModal = false;
 	}
 
-	async function removeSize( index: number ): Promise<void> {
+	function removeSize( index: number ): void {
     	sizesList = sizesList.filter((_, i) => i !== index);
   	}
 
@@ -47,45 +55,37 @@
 
 <AdminSidebar/>
 
-{#if form?.errors }    
-    <p>{ form?.errors }</p>    
-{/if}
-
 <main class="pt-24 lg:pl-72 pb-20 px-6 lg:px-12 min-h-screen">
-    <div class="max-w-5xl mx-auto">
+  <div class="max-w-5xl mx-auto">
         <div class="mb-12">
             <h1 class="font-notoSerif text-4xl lg:text-5xl tracking-tight text-on-surface mb-2">
                 { data.product.name }
-            </h1>            
+            </h1>
+            {#if typeof(form?.errors) === "string"}    
+                <p class="text-red-600">{ form?.errors }</p>
+            {/if}          
         </div>
 
-        <form name="productEditForm" class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" data-netlify="true">
+        <form name="productEditForm" class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" enctype="multipart/form-data" data-netlify="true">
             <div class="space-y-1 md:col-span-12">
                 <label for="name" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Name</label>
                 <input class="bg-surface-container-low focus:ring-primary/20 font-headline placeholder:text-outline w-full rounded-lg border-none p-4 text-xl italic transition-all focus:ring-2"
                         type="text" name="name" id="name" bind:value={ data.product.name } placeholder="e.g., Princess Dress Velvet Tuxedo" required />
+                {#if typeof(form?.errors) !== "string" && form?.errors?.name}
+                    <InputErrorText text={ form?.errors?.name[0] }/>
+                {/if}   
             </div>
 
             <div class="space-y-8 md:col-span-7">
-                <!-- <ProductImageUpload src={ data.product?.images[0]?.url }/> -->
 
-                <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-xl border-2 border-dashed p-1">                    
-                    <div class="z-10 px-6 text-center justify-items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload-icon lucide-cloud-upload text-primary mb-4 text-5xl"><path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/></svg>
-                        <p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
-                        <p class="text-on-surface-variant font-body mt-2 text-sm">
-                            High-resolution portrait recommended (4:5 ratio)
-                        </p>
-                        <button class="text-primary mt-6 rounded-full bg-white px-6 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md" 
-                                type="button">
-                            Browse Files
-                        </button>
-                    </div>
-                    <div class="bg-primary/5 pointer-events-none absolute inset-0 opacity-0 transition-opacity group-hover:opacity-100"></div>
-                </div>
+                <ProductImageUpload src={ data.product?.images[0]?.url || undefined } 
+                                    errors={typeof(form?.errors) !== "string" && form?.errors?.file ? form?.errors?.file : undefined}/>
 
                 <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
-                    <input id="jsonSizes" bind:value={ jsonSizes } type="hidden" name="jsonSizes"/>      
+                    <input id="jsonSizes" bind:value={ jsonSizes } type="hidden" name="jsonSizes"/>
+                    {#if typeof(form?.errors) !== "string" && form?.errors?.sizes}
+                        <InputErrorText text={ form?.errors?.sizes[0] }/>  
+                    {/if} 
                     <table class="w-full border-collapse text-left">
                         <thead>
                             <tr class="border-outline-variant/10 border-b">
@@ -117,18 +117,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </table>
-
-                    <!-- <div class="space-y-2">
-                        <label for="description" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
-                            Description
-                        </label>
-                        <textarea  id="description" name="description" bind:value={ data.description }
-                            class="bg-surface-container-low focus:ring-primary/20 font-body text-on-surface placeholder:text-outline w-full rounded-lg border-none p-4 leading-relaxed transition-all focus:ring-2"
-                            placeholder="Describe the fabric, the drape, and the inspiration behind this piece..."
-                            rows="5"
-                        ></textarea>
-                    </div> -->
+                    </table>                    
                 </div>
             </div>
 
@@ -138,12 +127,18 @@
                         <label for="color" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Color</label>
                         <input class="w-full bg-surface-container-low border-none rounded-lg p-4 pl-8 focus:ring-2 focus:ring-primary/20 transition-all font-body text-black"
                                 type="text" name="color" id="color" bind:value={ data.product.color } placeholder="Blue" required />
+                        {#if typeof(form?.errors) !== "string" && form?.errors?.color}    
+                            <p class="text-red-600">{ form?.errors?.color[0] }</p>
+                        {/if}
                     </div>
 
-                    <div class="space-y-2">
+                    <div class="space-y-2">                        
                         <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                             Category
                         </label>
+                        {#if typeof(form?.errors) !== "string" && form?.errors?.category}    
+                            <p class="text-red-600">{ form?.errors?.category[0] }</p>
+                        {/if}
                         <select class="bg-surface-container-low focus:ring-primary/20 font-body w-full rounded-lg border-none p-4 transition-all focus:ring-2"
                                 id="category" name="category" bind:value={ data.product.category }>
                             <option value="mommy_and_me">Mommy and Me</option>
@@ -158,6 +153,9 @@
                         <label for="description" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                             Description
                         </label>
+                        {#if typeof(form?.errors) !== "string" && form?.errors?.description}    
+                            <p class="text-red-600">{ form?.errors?.description[0] }</p>
+                        {/if}
                         <textarea  id="description" name="description" 
                             class="bg-surface-container-low focus:ring-primary/20 font-body text-on-surface placeholder:text-outline w-full rounded-lg border-none p-4 leading-relaxed transition-all focus:ring-2"
                             placeholder="Describe the fabric, the drape, and the inspiration behind this piece..."
@@ -172,10 +170,14 @@
                     <label for="" class="text-on-surface-variant font-manrope mb-2 block text-xs font-bold tracking-widest uppercase">
                         Archived properties
                     </label>
+                    {#if typeof(form?.errors) !== "string" && form?.errors?.description}    
+                        <p class="text-red-600">{ form?.errors?.description[0] }</p>
+                    {/if}
                     <div class="space-y-3">
                         <label class="group flex cursor-pointer items-center">
                             <div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
-                                <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" name="activo" />
+                                <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" name="activo"
+                                        bind:checked={ data.product.activo } />
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
                             </div>
                             <span class="font-body text-on-surface ml-3 text-sm">Active</span>
@@ -194,11 +196,10 @@
                 </div>
             </div>
         </form>
-
-    </div>
+    </div>    
 </main>
 
-<Modal open={ openModal }>
+<Modal bind:open={ openModal }>
     <form class="space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]" onsubmit = { addSize }>
         <div class="space-y-2">
             <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">

@@ -7,11 +7,19 @@ export const stripeConnection = new Stripe(STRIPE_SECRET_KEY);
 
 export function computeRentalAmounts(total: number) {
     let basePrice = Math.round(total * 100);
-    const deposit = Math.round(basePrice / 2) / 100;
-    const remaining = (basePrice - deposit) / 100 ;
-    const tax = Math.round(basePrice * 0.07) / 100;
-    const finalPayment = (remaining + tax) / 100;
+    let deposit = Math.round(basePrice / 2);
+    let tax = Math.round(basePrice * 0.07);
+    let remaining = basePrice - deposit;
+    let finalPayment = remaining + tax;
+    let totalWithTax = basePrice + tax;
+
+    tax = tax / 100;
+    deposit = deposit / 100
     basePrice = basePrice / 100;
+    remaining = remaining / 100;
+    finalPayment = finalPayment / 100;
+    totalWithTax = totalWithTax / 100;
+
 
     return {
         basePrice,
@@ -19,6 +27,6 @@ export function computeRentalAmounts(total: number) {
         remaining,
         tax,
         finalPayment,
-        totalWithTax: basePrice + tax
+        totalWithTax
     };
 }

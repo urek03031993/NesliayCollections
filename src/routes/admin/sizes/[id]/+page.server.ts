@@ -1,6 +1,8 @@
 import { error, fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import type { Size } from "$lib/server/types/models";
+import { sizeSchemaZod } from "$lib/zod/schema";
+import z from "zod";
 
 
 export const load: PageServerLoad = async({ params, fetch }) => {
@@ -21,6 +23,15 @@ export const actions = {
                 size: formData.get('size') ?? '',
                 height: formData.get('height') ?? '',
             };
+
+        const sizeValidation = await sizeSchemaZod.safeParseAsync(body);
+        
+        if (!sizeValidation.success) {
+            return fail(400, {
+                errors: z.flattenError(sizeValidation.error).fieldErrors,
+                data: body
+            });
+        }
 
         const response = await fetch(`/api/size/${params.id}`, {
             method: 'PUT',

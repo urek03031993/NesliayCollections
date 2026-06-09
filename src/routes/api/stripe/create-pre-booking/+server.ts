@@ -2,7 +2,7 @@ import { db } from '$lib/server';
 import { eq } from 'drizzle-orm';
 import { v4 as uuidv4 } from 'uuid';
 import { json, error } from '@sveltejs/kit';
-import type { RequestHandler } from './$types';
+import type { RequestHandler } from './$types'; 
 import { isValidRentalPeriod } from '$lib/utils/utils';
 import { stripeConnection, computeRentalAmounts } from '$lib/stripe/stripe';
 import { client, payment_orders, rental, rental_items } from '$lib/server/db';
@@ -57,12 +57,11 @@ export const POST: RequestHandler = async ({ request }) => {
             amount: amounts.deposit * 100,
             currency: 'usd',
             customer: customer.id,
-            // capture_method: 'manual',
             setup_future_usage: 'off_session',
             automatic_payment_methods: { enabled: true },
             metadata: {
                 rentalId: rentalId,
-                payment_phase: 'deposit_hold',
+                checkout_type: 'deposit_hold',
                 base_price: amounts.basePrice * 100,
                 deposit_amount: amounts.deposit * 100,
                 expected_final_payment: amounts.finalPayment * 100,
@@ -110,7 +109,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 subtotal: amounts.basePrice.toString(),
                 tax_amount: amounts.tax.toString(),
                 total: amounts.totalWithTax.toString(),
-                state: 'prebook',
+                state: 'draft',
             }).returning();
 
             if(!insertRental){
@@ -138,7 +137,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 customerId: customer.id,
                 rental_id: insertRental[0].id,
                 state: "pending",
-                amount: amounts.basePrice.toString(),
+                amount: amounts.deposit.toString(),
                 reference: paymentIntent.id,
             }).returning();
 
@@ -162,6 +161,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
     } catch (err) {
         console.error('Error creating payment intent:', err);
-        throw error(500, 'Error creating payment intent');
+        error(500, 'Error creating payment intent');
     }
 };

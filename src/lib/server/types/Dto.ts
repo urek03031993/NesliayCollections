@@ -26,6 +26,12 @@ export interface SizeDto {
 	height: SizeType;
 }
 
+export interface SizeObjDto {
+	id: number;
+	size: string;
+	height: SizeType;
+}
+
 
 export interface RentalDto {
 	rentalId: string;
@@ -83,6 +89,18 @@ export interface ProductWithPriceInfo {
 	color: string;
 	sizes: ProductSizesPriceInfo[];
 	images: ProductImageInfo[];	
+}
+
+
+export interface ProductCatalogList {
+	id: number;
+	name: string;
+	description?: string;
+	color: string;
+	category: ProductCategory;
+	activo: boolean;
+	sizes: { price: string }[];
+	images: { url: string }[];
 }
 
 

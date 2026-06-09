@@ -7,7 +7,6 @@
 </script>
 
 
-
 <AdminSidebar/>
 
 <main class="mx-auto max-w-5xl px-6 pt-32 md:px-12 mb-16">
@@ -39,6 +38,7 @@
 								placeholder="Isabella Vane"
 								type="text"
                                 name="name"
+								bind:value={data.client.name}
 							/>
 						</div>
 						<div class="space-y-2">
@@ -50,6 +50,7 @@
 								placeholder="isabella@atelier.com"
 								type="email"
                                 name="email"
+								bind:value={data.client.email}
 							/>
 						</div>
 						<div class="space-y-2 md:col-span-2">
@@ -61,6 +62,7 @@
 								placeholder="+1 (555) 000-0000"
 								type="tel"
                                 name="phone"
+								bind:value={data.client.phone}
 							/>
 						</div>
 					</div>
@@ -166,11 +168,8 @@
 							<select bind:value={ data.state } class="w-full appearance-none rounded-lg border-none bg-surface-container-lowest p-4 text-on-surface focus:ring-2 focus:ring-primary-container">
                                     <option value='draft'>Draft</option>
                                     <option value='confirmed'>Confirmed</option>
-                                    <option value='in_process'>In Process</option>
-                                    <option value='submitted'>Submitted</option>
-                                    <option value='returned'>Returned</option>
-                                    <option value='completed'>Completed</option>
-                                    <option value='overdue'>Overdue</option>
+                                    <option value='prebook'>Pre-Reserva</option>
+                                    <option value='reserved'>Reservedo</option>  
                                     <option value='cancelled'>Cancelled</option>
 							</select>
 						</div>

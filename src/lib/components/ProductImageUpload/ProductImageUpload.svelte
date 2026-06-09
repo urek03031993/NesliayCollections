@@ -1,19 +1,25 @@
 <script lang="ts">
+	import InputErrorText from "../inputErrorText/inputErrorText.svelte";
+    import type { ProductImageUploadProps } from "./interfaces";
 
-    let { src = '' } = $props();
+    let { src, errors }: ProductImageUploadProps = $props();
+
 
     let files = $state<FileList | null>();
     let fileInput = $state<HTMLInputElement>();
     let previewUrl = $state('');
-    let imgSrc = $state('');
+    let imgSrc = $state<string>();
 
     
     function clearFiles(): void {
-        if(files){ 
-            files = null;
-            imgSrc = ''; 
-        }        
-	}
+        if(!src && !files) return;
+
+        if(src) src = undefined;
+
+        files = null;
+        imgSrc = undefined;                
+	};
+
 
 	function handleFileSelect(): void {
 		const selectedFiles = fileInput?.files;
@@ -63,14 +69,24 @@
         if (previewUrl) {
             URL.revokeObjectURL(previewUrl);
         }
-	}
+	};
+
 
 	function openFileInput(): void {
         if(fileInput) fileInput.click();
-	}
+	};
 </script>
 
+
+{#if errors}
+    <div class="space-y-8 md:col-span-7">
+        <InputErrorText text={ errors[0] }/>
+    </div>
+{/if} 
+
+
 <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed p-1">
+          
     {#if !files && !src}
         <div class="z-10 px-6 text-center justify-items-center">
             <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload-icon lucide-cloud-upload text-primary mb-4 text-5xl"><path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/></svg>
@@ -86,13 +102,24 @@
             {/if}                        
         </div>
     {/if}
-    <input id="images" name="images" type="file" accept="image/png, image/jpeg" hidden
-                    bind:this={ fileInput } onchange={ handleFileSelect }/>
+
+    <input  id="images" 
+            name="images" 
+            type="file" 
+            accept="image/png, image/jpeg" hidden
+            bind:this={ fileInput } 
+            onchange={ handleFileSelect }/>
+
+    <input  id="imagesSrc" 
+            name="imageSrc" 
+            type="string" 
+            hidden
+            bind:value={ src } />
+
     <div class="bg-surface-container-low absolute aspect-4/5 overflow-hidden rounded-3xl">
-        {#if files || src}
-            {#if imgSrc || src}
-                <img src={ src } alt="Vista previa"/>
-            {/if}
+        {#if imgSrc || src}
+            <img src={ src || imgSrc } alt="Vista previa"/>
+
             <div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
             <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
                     onclick={()=>{ clearFiles() }}

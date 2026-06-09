@@ -4,81 +4,22 @@
 	import { resolve } from "$app/paths";
 	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";	
 	import Modal from "$lib/components/Modal/Modal.svelte";
+	import ProductImageUpload from "$lib/components/ProductImageUpload/ProductImageUpload.svelte";
+	import { toastStore } from "$lib/stores/store";
 
     
     let { data, form }: PageProps = $props();
 
     $effect.pre(()=>{
         if(form?.success) {
-            goto(resolve('/admin/products'))
+            toastStore.success("Vestido agregada satisfactoriamente");
+            goto(resolve('/admin/products'));
+        }
+
+        if(form?.errors) {
+            toastStore.error("Ocurrio un error al crear el vestido revise por favor");
         }
     });
-
-    let files: FileList | undefined | null  = $state();
-    let fileInput: HTMLInputElement | undefined= $state();
-    let previewUrl = $state('');
-    let imgSrc = $state('');
-
-    function clearFiles(): void {
-        if(files){ 
-            files = null;
-            imgSrc = ''; 
-        }        
-	}
-
-	function handleFileSelect(): void {
-		const selectedFiles = fileInput?.files;
-
-		if (selectedFiles && selectedFiles.length > 0) {
-			files = selectedFiles;
-            previewUrl = URL.createObjectURL(files[0]);	
-
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            if (!ctx) return;
-
-            const img = new Image();
-            const blobUrl = URL.createObjectURL(files[0]);
-            img.src = blobUrl;
-
-            img.onload = () => {
-                const maxWidth = 1080;
-                const maxHeight = 1350;
-                let width = img.width;
-                let height = img.height;
-
-                if (width > height) {
-                    if (width > maxWidth) {
-                    height = Math.round((height * maxWidth) / width);
-                    width = maxWidth;
-                    }
-                } else {
-                    if (height > maxHeight) {
-                    width = Math.round((width * maxHeight) / height);
-                    height = maxHeight;
-                    }
-                }
-
-                canvas.width = width;
-                canvas.height = height;
-                ctx.drawImage(img, 0, 0, width, height);
-                imgSrc = canvas.toDataURL('image/jpeg', 0.9);
-                URL.revokeObjectURL(blobUrl);
-            };
-
-            img.onerror = () => {
-                URL.revokeObjectURL(blobUrl);
-            };  
-		}
-
-        if (previewUrl) {
-            URL.revokeObjectURL(previewUrl);
-        }
-	}
-
-	function openFileInput(): void {
-        if(fileInput) fileInput.click();
-	}
 
 
     let openModal = $state(false);
@@ -102,7 +43,6 @@
 	function removeSize( index: number ): void {
     	sizesList = sizesList.filter((_, i) => i !== index);
   	}
-
 </script>
 
 <AdminSidebar/>
@@ -121,52 +61,27 @@
             <p class="text-on-surface-variant font-body">
                 Adding a new dress to the Collection.
             </p>
+            {#if typeof(form?.errors) === "string"}    
+                <p class="text-red-600">{ form?.errors }</p>
+            {/if}
         </div>
         
         <form name="productForm" class="grid grid-cols-1 gap-8 md:grid-cols-12" method="POST" enctype="multipart/form-data" data-netlify="true">
             <div class="space-y-1 md:col-span-12">
                 <label for="name" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Name</label>
                 <input class="bg-surface-container-low focus:ring-primary/20 font-headline placeholder:text-outline w-full rounded-lg border-none p-4 text-xl italic transition-all focus:ring-2"
-                        type="text" name="name" id="name" placeholder="e.g., Princess Dress Velvet Tuxedo" required />                        
+                        type="text" name="name" id="name" placeholder="e.g., Princess Dress Velvet Tuxedo" required />
+                {#if typeof(form?.errors) !== "string" && form?.errors?.name}    
+                    <p class="text-red-600">{ form?.errors?.name[0] }</p>
+                {/if}                      
             </div>
 
             <div class="space-y-8 md:col-span-7">
-                <div class="bg-surface-container-low group border-outline-variant/30 relative flex aspect-4/5 items-center justify-center overflow-hidden rounded-3xl border-2 border-dashed p-1">
-                    {#if !files }
-                        <div class="z-10 px-6 text-center justify-items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-cloud-upload-icon lucide-cloud-upload text-primary mb-4 text-5xl"><path d="M12 13v8"/><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242"/><path d="m8 17 4-4 4 4"/></svg>
-                            <p class="font-headline text-on-surface text-xl">Upload Creation Imagery</p>
-                            <p class="text-on-surface-variant font-body mt-2 text-sm">
-                                High-resolution portrait recommended (4:5 ratio)
-                            </p>
-                            {#if files === null || files === undefined }
-                                <button class="text-primary mt-6 rounded-full bg-white px-6 py-2 text-sm font-bold shadow-sm transition-all hover:shadow-md" 
-                                        type="button" onclick={()=>{ openFileInput()}}> 
-                                    Browse Files
-                                </button>
-                            {/if}                        
-                        </div>
-                    {/if}
-                    <input id="images" name="images" type="file" accept="image/png, image/jpeg" hidden
-                                    bind:this={ fileInput } onchange={ handleFileSelect }/>
-                    <div class="bg-surface-container-low absolute aspect-4/5 overflow-hidden rounded-3xl">
-                        {#if files }
-                            {#if imgSrc}
-                                <img src={ imgSrc } alt="Vista previa"/>
-                            {/if}
-                            <div class="absolute inset-0 bg-black/5 transition-colors group-hover:bg-black/0"></div>
-                            <button class="bg-surface/90 text-primary absolute bottom-6 left-1/2 -translate-x-1/2 translate-y-4 rounded-full px-8 py-3 text-sm font-semibold opacity-0 backdrop-blur-md transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-                                    onclick={()=>{ clearFiles() }}
-                                    type="button"
-                                    title="delete">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                            </button>                                                 
-                        {/if}                    
-                    </div>
-                </div>
 
-                <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
-                    <input id="jsonSizes" bind:value={ jsonSizes } type="hidden" name="jsonSizes"/>      
+                <ProductImageUpload errors={typeof(form?.errors) !== "string" && form?.errors?.file ? form?.errors?.file : undefined}/>
+
+                <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">                    
+                    <input id="jsonSizes" bind:value={ jsonSizes } type="hidden" name="jsonSizes"/>                    
                     <table class="w-full border-collapse text-left">
                         <thead>
                             <tr class="border-outline-variant/10 border-b">
@@ -199,6 +114,9 @@
                             </tr>
                         </tbody>
                     </table>
+                    {#if typeof(form?.errors) !== "string" && form?.errors?.sizes}    
+                        <p class="text-red-600">{ form?.errors?.sizes[0] }</p>
+                    {/if}
                 </div>
             </div>
 
@@ -209,6 +127,9 @@
                         <label for="color" class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Color</label>
                         <input class="w-full bg-surface-container-low border-none rounded-lg p-4 pl-8 focus:ring-2 focus:ring-primary/20 transition-all font-body text-black"
                                 type="text" name="color" id="color" placeholder="Blue" required />
+                        {#if typeof(form?.errors) !== "string" && form?.errors?.color}    
+                            <p class="text-red-600">{ form?.errors?.color[0] }</p>
+                        {/if}
                     </div>
 
                     <div class="space-y-2">
@@ -229,12 +150,15 @@
                     <div class="space-y-2">
                         <label for="description" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                             Description
-                        </label>
+                        </label>                        
                         <textarea  id="description" name="description" 
                             class="bg-surface-container-low focus:ring-primary/20 font-body text-on-surface placeholder:text-outline w-full rounded-lg border-none p-4 leading-relaxed transition-all focus:ring-2"
                             placeholder="Describe the fabric, the drape, and the inspiration behind this piece..."
                             rows="5"
                         ></textarea>
+                         {#if typeof(form?.errors) !== "string" && form?.errors?.description}    
+                            <p class="text-red-600">{ form?.errors?.description[0] }</p>
+                        {/if}
                     </div>
                     
                 </div>
@@ -250,7 +174,10 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
                             </div>
                             <span class="font-body text-on-surface ml-3 text-sm">Active</span>
-                        </label>				
+                        </label>
+                        {#if typeof(form?.errors) !== "string" && form?.errors?.activo}    
+                        <p class="text-red-600">{ form?.errors?.activo[0] }</p>
+                    {/if}			
                     </div>
                 </div>
 
@@ -267,6 +194,11 @@
         </form>
     </div>
 </main>
+
+
+
+
+
 
 <Modal  open={ openModal }>
     <form class="space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]" onsubmit = { addSize }>

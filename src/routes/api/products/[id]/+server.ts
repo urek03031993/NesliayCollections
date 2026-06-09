@@ -5,40 +5,40 @@ import { image, product, product_size, size } from '$lib/server/db/schema';
 import type { RequestHandler } from './$types';
 import type { ProductCategory } from '$lib/server/types/models';
 
+
 interface ProductSizes {
-	id: number; 
-	size_id: number; 
-	size: string;
-	price: number;
-	quantity: number;
-}
+    size_id: number;
+    size: string;
+    price: string;
+    quantity: number;
+};
 
 
-interface ProductImage {
-	id: number;
-	url: string;
-	short_description: string;
-}
-
-
-interface Product {
-	id: number;
+interface productUpdateData {
 	name: string;
-	slug: string;
 	description?: string;
 	color: string;
 	category: ProductCategory;
-	sizes: ProductSizes[];
-	images: ProductImage[];
+	activo: boolean;
+	sizes: ProductSizes[],
+	url?: string,
+	file_name?: string,
+	short_description?: string
 }
 
 
 export const GET: RequestHandler = async ({ params }) => {
 	try {
+		const id = parseInt(params.id);
+
+		if (isNaN(id)) {
+			return json({ message: 'invalid ID '}, { status: 400 });
+		}
+
 		const productTransaction = await db.transaction( async(tx) => {
 			
 			const productSelect = await tx.query.product.findFirst({
-				where: eq(product.id, parseInt(params.id)),
+				where: eq(product.id, id),
 				columns: {
 					id: true,
 					name: true,
@@ -98,23 +98,42 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 			return json({ error: 'Unauthorized' }, { status: 401 });
 		}
 
-		const body: Product = await request.json();
+		const id = parseInt(params.id);
+
+		if (isNaN(id)) {
+			return json({ message: 'invalid ID '}, { status: 400 });
+		}
+
+		const body: productUpdateData = await request.json();
 
 		const transaction = await db.transaction( async(tx) => {
 
 			const productUpdate = await tx.update(product)
 									.set({ name: body.name, description: body.description, color: body.color, category: body.category })
-									.where(eq(product.id, parseInt(params.id)))
+									.where(eq(product.id, id))
 									.returning();
 		
 			if (!productUpdate) {
 				return json({ error: 'Product not found' }, { status: 404 });
 			}
 
+			if(body.url && body.short_description && body.file_name){
+
+				const productImageUpdate = await tx.update(image)
+										.set({ url: body.url, file_name: body.file_name, short_description: body.short_description })
+										.where(eq(image.product_id, id))
+										.returning();
+			
+				if (!productImageUpdate) {
+					return json({ error: 'Product not found' }, { status: 404 });
+				}
+			}
+
+
 			await tx.delete(product_size).where(eq(product_size.product_id, parseInt(params.id)));
 	
 			const sizesUpdate = await tx.insert(product_size).values(
-				body.sizes.map((size: { size_id: number, size: string; price: number; quantity: number }) => ({
+				body.sizes.map((size: { size_id: number, size: string; price: string; quantity: number }) => ({
 					product_id: productUpdate[0].id,
 					size_id: size.size_id,
 					price: size.price.toString(),
