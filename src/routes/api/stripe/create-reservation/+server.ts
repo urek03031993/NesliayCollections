@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
                  email, name, last_name, phone, document_type, identification_document }: paymentIntentRequest = await request.json();
 
         if (!termsAccepted) error(400, 'You must accept the terms and conditions');
-        if (isValidRentalPeriod(startDate, endDate)) error(400, 'The rental period must be less than 5 days');
+        if (!isValidRentalPeriod(startDate, endDate)) error(400, 'The rental period must be less than 5 days');
 
         let customer;
         const rentalId = uuidv4();
@@ -59,7 +59,8 @@ export const POST: RequestHandler = async ({ request }) => {
             customer: customer.id,
             metadata: {
                 rentalId: rentalId,
-                payment_phase: 'deposit_hold',
+                checkout_type: 'complete-payment',
+                order_type: 'reservation',               
                 base_price: amounts.basePrice * 100,
                 tax_amount: amounts.tax * 100,
                 terms_accepted: termsAccepted.toString()
@@ -91,7 +92,8 @@ export const POST: RequestHandler = async ({ request }) => {
                 }).returning();
 
                 if(!clientCreate){
-                    error(400, 'Failed to create the client')
+                    console.error('Failed to create the client')
+                    error(400, 'Failed to create the client');
                 }
 
                 clientId = clientCreate[0].id;
@@ -105,11 +107,12 @@ export const POST: RequestHandler = async ({ request }) => {
                 subtotal: amounts.basePrice.toString(),
                 tax_amount: amounts.tax.toString(),
                 total: amounts.totalWithTax.toString(),
-                state: 'reserved',
+                state: 'draft',
             }).returning();
 
             if(!insertRental){
-                throw new Error('Failed to create the rental');
+                console.error('Failed to create the rental');
+                error(400, 'Failed to create the rental');
             }
 
             const rentalItems = await tx.insert(rental_items).values(				
@@ -125,7 +128,8 @@ export const POST: RequestHandler = async ({ request }) => {
             )).returning();
 
             if(!rentalItems){
-                throw new Error('Failed to create the items of rental')
+                console.error('Failed to create the items of rental');
+                error(400, 'Failed to create the items of rental');
             }
 
             const paymentsOrder = await tx.insert(payment_orders).values({
@@ -138,7 +142,8 @@ export const POST: RequestHandler = async ({ request }) => {
             }).returning();
 
             if(!paymentsOrder){
-                throw new Error('Failed to create the payment order')
+                console.error('Failed to create the payment order');
+                error(400, 'Failed to create the payment order');
             }
 
             return { rental: insertRental, rentalItems: rentalItems, paymentsOrder: paymentsOrder }
@@ -157,6 +162,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
     } catch (err) {
         console.error('Error creating payment intent:', err);
-        throw error(500, 'Error creating payment intent');
+        error(500, 'Error creating payment intent');
     }
 };

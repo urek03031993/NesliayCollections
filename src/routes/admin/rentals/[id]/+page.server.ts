@@ -1,12 +1,32 @@
 import { fail } from "@sveltejs/kit";
 import type { Actions, PageServerLoad } from "./$types";
 import { buildRequestBody } from "$lib/utils/utils";
+import type { Client, RentalItem } from "$lib/server/types/models";
+
+
+interface rental {
+    id: number;
+    updatedAt: Date;
+    rentalId: string;
+    clientId: number;
+    start_date: string;
+    end_date: string;
+    tax_amount: string;
+    tax_percent: string | null;
+    subtotal: string;
+    total: string;
+    state: "draft" | "prebook" | "reserved" | "cancelled";
+    notes: string | null;
+    creadoAt: Date;
+    items: RentalItem[];
+    client: Client;
+}
 
 
 export const load: PageServerLoad = async({ params, fetch }) => {
     const response = await fetch(`/api/rentals/${params.id}`);
     
-    const rental = await response.json();
+    const rental: rental = await response.json();
 
     return rental
 };

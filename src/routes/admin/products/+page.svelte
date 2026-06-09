@@ -5,7 +5,7 @@
 	import ModallDelete from "$lib/components/ModalDelete/ModallDelete.svelte";
 	import type { PageProps } from "./$types";
 
-	let { data }: PageProps = $props();
+	let { data, form }: PageProps = $props();
 
 	let delete_id: number = $state(0);
 	let open_delete: boolean = $state(false);
@@ -33,6 +33,11 @@
 			<p class="text-on-surface-variant font-body mt-2 italic">
 				The best dresses for the best occasions.
 			</p>
+			{#if form?.error}
+				<p class="text-red-700 font-bold mt-2">
+					{ form.error.message }					
+				</p>				
+			{/if}
 		</div>
 		<div class="flex items-center space-x-4">			
 			<button class="bg-tertiary text-on-tertiary flex items-center space-x-2 rounded-full px-6 py-2 font-medium shadow-lg transition-all hover:brightness-110"

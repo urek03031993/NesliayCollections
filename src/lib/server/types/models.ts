@@ -9,6 +9,7 @@ import {
 	client,
 	rental,
 	payment_orders,
+	rental_items,
 	// categorie,
 	// rental_items,
 	// reservations_calendar,
@@ -39,6 +40,7 @@ export type Image = InferSelectModel<typeof image>;
 export type Product = InferSelectModel<typeof product>;
 export type ProductSize = InferSelectModel<typeof product_size>;
 export type Rental = InferSelectModel<typeof rental>;
+export type RentalItem = InferSelectModel<typeof rental_items>;
 export type Client = InferSelectModel<typeof client>;
 export type PaymentOrder = InferSelectModel<typeof payment_orders>;
 // export type ReservationsCalendar = InferSelectModel<typeof reservations_calendar>;

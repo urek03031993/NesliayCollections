@@ -22,6 +22,13 @@
 		return data.product.sizes[0];
 	});
 
+	// let dressInCart = $derived.by(()=>{
+	// 	if (current_size) {
+	// 		return $cart.find(item => item.product.id === data.product.id && item.product.size_id === current_size.size_id)?.quantity || 0;
+	// 	}
+	// 	return undefined;
+	// });
+
 	function addDress(){
 		if ( current_size ){
 			cart.addItem({
@@ -37,19 +44,7 @@
 				shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
 			});
 		}
-		// console.log('Adding to cart:', {
-		// 	id: data.product.id,
-		// 	name: data.product.name,
-		// 	color: data.product.color,
-		// 	price: current_size.price,
-		// 	available_quantity: current_size.available_quantity,
-		// 	size_id: current_size.size_id,
-		// 	size: current_size.size,
-		// 	product_size_id: current_size.id,
-		// 	url: data.product.images.length > 0 ? data.product.images[0].url : '',
-		// 	shortDescription: data.product.images.length > 0 ? data.product.images[0].short_description : ''
-		// });	
-	}	
+	}
 
 	let initialRentals = [
 		{ id: 1, start: '2026-04-10', end: '2026-04-15', quantity: 3, name: 'Reserva Semana Santa' },
@@ -113,16 +108,19 @@
 
 			<Accordion title="Availability Calendar" open={ showCalendar }>
 				<AviabilityCalendar totalQuantity={current_size?.available_quantity || 0} rentals={initialRentals} onDateSelect={null}/>
-			</Accordion>
-
-			
+			</Accordion>			
 
 			<div class="mt-4 flex gap-4">				
-				<button class="text-white font-manrope h-16 flex-1 rounded-full text-lg font-bold shadow-xl transition-all hover:opacity-90 active:scale-95 flex items-center gap-4 justify-center"
+				<button class="text-white font-manrope h-16 flex-1 rounded-full text-lg font-bold shadow-xl transition-all hover:opacity-90 active:scale-95 flex items-center gap-4 justify-center disabled:opacity-60"
 						style="background: linear-gradient(to right, #735c00, #d4af37);"
-						onclick={()=>{ addDress(); }}>
+						onclick={()=>{ addDress(); }} disabled={!current_size || current_size.available_quantity === 0}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-shopping-cart-icon lucide-shopping-cart flex"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>
-					<span>Add to Cart</span>  
+					<span>Add to Cart</span>
+					<!-- {#if dressInCart}
+						<span class="ml-2 inline-flex items-center justify-center rounded-full bg-red-500 text-white text-xs font-bold px-2 py-1">
+							{ dressInCart } in Cart
+						</span>						
+					{/if} -->
 				</button>
 			</div>
 		</div>

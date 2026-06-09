@@ -6,12 +6,23 @@ import type { RequestHandler } from './$types';
 import type { RentalDto } from '$lib/server/types/Dto';
 
 
-export const GET: RequestHandler = async ({ params }) => {
-    try {		
+export const GET: RequestHandler = async ({ params, cookies }) => {
+    try {
+        if (!cookies.get('session')) {
+			return json({ message: 'Unauthorized' }, { status: 401 });
+		}
+
+		const id = parseInt(params.id);
+
+		if (isNaN(id)) {
+			return json({ message: 'invalid ID '}, { status: 400 });
+		}
+
         const result = await db.query.rental.findFirst({
-            where: eq(rental.id, parseInt(params.id)),
+            where: eq(rental.id, id),
             with: {
-                items: true
+                items: true,
+                client: true
             }
         });
 

@@ -7,7 +7,14 @@ if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
 import { drizzle } from 'drizzle-orm/postgres-js';
 import postgres from 'postgres';
 
-const client = postgres(env.DATABASE_URL, {prepare: false, ssl: 'require'});
+const client = postgres(env.DATABASE_URL, { prepare: false, 
+                                            ssl: 'require',
+                                            max_lifetime: 20,
+                                            idle_timeout: 10,
+                                            connect_timeout: 5,
+                                            max: 10,
+                                        });
+                                        
 export const db = drizzle(client, { schema });
 
 

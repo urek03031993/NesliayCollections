@@ -1,16 +1,14 @@
-import type { Actions, PageServerLoad } from "./$types";
-import type { Size } from "$lib/server/types/models";
 import { error, fail } from "@sveltejs/kit";
+import type { Actions, PageServerLoad } from "./$types";
+import type { SizeObjDto } from "$lib/server/types/Dto";
 
 
 export const load: PageServerLoad = async({ fetch }) => {
     const response = await fetch(`/api/size`);
 
-    const sizes: Size[] = await response.json();
+    if (!response.ok) error( response.status, 'Failed to fetch sizes');
 
-    if (!response.ok) {
-        return error(404, 'Failed to fetch sizes');
-    }    
+    const sizes: SizeObjDto[] = await response.json();       
 
     return { sizes }
 };
