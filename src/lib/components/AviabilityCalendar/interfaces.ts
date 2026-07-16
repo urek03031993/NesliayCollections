@@ -3,7 +3,7 @@
     start: string, 
     end: string, 
     quantity: number, 
-    name: string 
+    state: "prebook" | "reserved"
 }
 
 

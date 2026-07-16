@@ -1,30 +1,11 @@
+import z from 'zod';
+import { and } from 'drizzle-orm';
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/index.js';
-import { eq } from 'drizzle-orm';
-import { image, product, product_size, size } from '$lib/server/db/schema';
 import type { RequestHandler } from './$types';
-import type { ProductCategory } from '$lib/server/types/models';
-
-
-interface ProductSizes {
-    size_id: number;
-    size: string;
-    price: string;
-    quantity: number;
-};
-
-
-interface productUpdateData {
-	name: string;
-	description?: string;
-	color: string;
-	category: ProductCategory;
-	activo: boolean;
-	sizes: ProductSizes[],
-	url?: string,
-	file_name?: string,
-	short_description?: string
-}
+import { eq, gte, inArray } from 'drizzle-orm';
+import { productApiSchemaZod } from '$lib/zod/schema';
+import { image, product, product_size, rental, rental_items, size } from '$lib/server/db/schema';
 
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -34,6 +15,9 @@ export const GET: RequestHandler = async ({ params }) => {
 		if (isNaN(id)) {
 			return json({ message: 'invalid ID '}, { status: 400 });
 		}
+
+		const now = new Date();
+		const thisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
 
 		const productTransaction = await db.transaction( async(tx) => {
 			
@@ -64,26 +48,49 @@ export const GET: RequestHandler = async ({ params }) => {
 									})
 									.from(product_size)
 									.innerJoin(size, eq(product_size.size_id, size.id))
-									.where(eq(product_size.product_id, productSelect?.id))
+									.where(eq(product_size.product_id, productSelect?.id));
 			
 
 			const productImage = await tx.select({
 										id: image.id,
 									    url: image.url,
+										file_name: image.file_name,
 										short_description: image.short_description,
 									})
 									.from(image)
-									.where(eq(image.product_id, productSelect?.id))
+									.where(eq(image.product_id, productSelect?.id));
+			
+
+			const productRentals = await tx.select({
+												id: rental.id,
+												start: rental.start_date,
+												end: rental.end_date,
+												state: rental.state,
+												quantity: rental_items.quantity
+											})
+											.from(rental)
+											.innerJoin(rental_items, eq(rental_items.rental_id, rental.id))
+											.innerJoin(product_size, eq(product_size.id, rental_items.product_size_id))
+											.where(
+												and( 
+													eq(product_size.product_id, productSelect?.id), 
+													inArray(rental.state, ["prebook", "reserved"]),
+													gte(rental.start_date, thisMonth.toISOString())
+													)
+												);
 
 
-			return { product: productSelect, sizes: productSizeName, images: productImage }
+			return { product: productSelect, sizes: productSizeName, images: productImage, rentals: productRentals }
 		});		
 
 		if (!productTransaction) {
 			return json('Product not found', { status: 404 });
 		}
 		
-		return json({...productTransaction.product, sizes: productTransaction.sizes, images: productTransaction.images } , { status: 200 });						
+		return json({...productTransaction.product, 
+						sizes: productTransaction.sizes, 
+						images: productTransaction.images,
+						rentals: productTransaction.rentals } , { status: 200 });						
 		
 	}catch (error) {
 		console.error('Error fetching product:', error);
@@ -104,12 +111,23 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 			return json({ message: 'invalid ID '}, { status: 400 });
 		}
 
-		const body: productUpdateData = await request.json();
+		const body = await request.json();
+
+		const body_validated = await productApiSchemaZod.safeParseAsync(body);
+		
+		if (!body_validated.success) {
+			return json({ errors: z.flattenError(body_validated.error).fieldErrors }, { status: 400 });
+		}
 
 		const transaction = await db.transaction( async(tx) => {
 
 			const productUpdate = await tx.update(product)
-									.set({ name: body.name, description: body.description, color: body.color, category: body.category })
+									.set({ 
+										name: body_validated.data.name, 
+										description: body_validated.data.description, 
+										color: body_validated.data.color, 
+										category: body_validated.data.category 
+									})
 									.where(eq(product.id, id))
 									.returning();
 		
@@ -117,23 +135,25 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 				return json({ error: 'Product not found' }, { status: 404 });
 			}
 
-			if(body.url && body.short_description && body.file_name){
+			if(body_validated.data.imagesData.length > 0){
 
-				const productImageUpdate = await tx.update(image)
-										.set({ url: body.url, file_name: body.file_name, short_description: body.short_description })
-										.where(eq(image.product_id, id))
-										.returning();
-			
-				if (!productImageUpdate) {
-					return json({ error: 'Product not found' }, { status: 404 });
+				const insertedProductImage = await tx.insert(image).values(
+					body_validated.data.imagesData.map((image) => ({
+						product_id: productUpdate[0].id,
+						url: image.url,
+						file_name: image.file_name,               
+						short_description: image.short_description,
+					}))).returning();
+
+				if(!insertedProductImage){
+					throw new Error('Failed to upload the image for the product')
 				}
 			}
-
 
 			await tx.delete(product_size).where(eq(product_size.product_id, parseInt(params.id)));
 	
 			const sizesUpdate = await tx.insert(product_size).values(
-				body.sizes.map((size: { size_id: number, size: string; price: string; quantity: number }) => ({
+				body_validated.data.sizes.map((size) => ({
 					product_id: productUpdate[0].id,
 					size_id: size.size_id,
 					price: size.price.toString(),

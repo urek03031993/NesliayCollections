@@ -45,11 +45,6 @@
 			});
 		}
 	}
-
-	let initialRentals = [
-		{ id: 1, start: '2026-04-10', end: '2026-04-15', quantity: 3, name: 'Reserva Semana Santa' },
-		{ id: 2, start: '2026-04-20', end: '2026-04-22', quantity: 5, name: 'Evento Corporativo' }
-	];
 </script>
 
 <Header />
@@ -107,7 +102,7 @@
 			</div>
 
 			<Accordion title="Availability Calendar" open={ showCalendar }>
-				<AviabilityCalendar totalQuantity={current_size?.available_quantity || 0} rentals={initialRentals} onDateSelect={null}/>
+				<AviabilityCalendar totalQuantity={current_size?.available_quantity || 0} rentals={data.product.rentals} onDateSelect={null}/>
 			</Accordion>			
 
 			<div class="mt-4 flex gap-4">				

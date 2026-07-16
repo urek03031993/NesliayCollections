@@ -1,4 +1,5 @@
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 
 import {
 	user,
@@ -32,7 +33,7 @@ export type RentalStatus = 'draft' | 'prebook' | 'reserved' | 'cancelled';
 
 
 // ==========================================
-// MODELOS BASE (SELECT)
+// TYPES BASE (SELECT)
 // ==========================================
 export type Size = InferSelectModel<typeof size>;
 export type User = InferSelectModel<typeof user>;
@@ -49,7 +50,7 @@ export type PaymentOrder = InferSelectModel<typeof payment_orders>;
 
 
 // ==========================================
-// MODELOS PARA INSERT (NEW)
+// TYPES PARA INSERT (NEW)
 // ==========================================
 export type NewSize = InferInsertModel<typeof size>;
 export type NewUser = InferInsertModel<typeof user>;
@@ -63,6 +64,24 @@ export type NewPaymentOrder = InferInsertModel<typeof payment_orders>;
 // export type NewReservationsCalendar = InferInsertModel<typeof reservations_calendar>;
 // export type NewRentalHistory = InferInsertModel<typeof rental_history>;
 // export type NewConfiguration = InferInsertModel<typeof configuration>;
+
+
+
+// ==========================================
+// MODELOS PARA INSERT ZOD
+// ==========================================
+
+export const sizeInsertSchema = createInsertSchema(size);
+export const sizeUpdateSchema = createUpdateSchema(size);
+
+
+export const productInsertSchema = createInsertSchema(size);
+// export const sizeUpdateSchema = createUpdateSchema(size);
+
+
+
+
+
 
 
 // ==========================================

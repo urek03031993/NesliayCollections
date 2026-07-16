@@ -34,3 +34,4 @@ export const GET: RequestHandler = async ({ url }) => {
 		return json({ error: 'Failed to fetch products' }, { status: 500 });
 	}
 }
+

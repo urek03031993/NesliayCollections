@@ -5,10 +5,17 @@ import { buildImageName, buildSlug } from '$lib/utils/utils';
 export const supabase = createClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_PUBLISHABLE_KEY);
 
 
+export type supabaseUploadImage = { 
+    success: boolean, 
+    file_name?: string, 
+    url?: string, 
+    short_description?: string
+}
+
 export async function uploadFileToSupabaseStorage(fileName: string, buffer: ArrayBuffer, contentType: string, storageName: string) {
     const { data, error } = await supabase.storage.from(storageName).upload(fileName, buffer, {contentType: contentType});
     
-    return { data, error };
+    return { data, error }
 }
 
 export function getPublicUrlSupabase(fileName: string, storageName: string) {
@@ -17,31 +24,41 @@ export function getPublicUrlSupabase(fileName: string, storageName: string) {
     return urlData;
 }
 
+export async function uploadImages(files: File[], dressName: string, color: string): Promise<supabaseUploadImage[]> {
+    const uploadedImages: supabaseUploadImage[] = [];
 
-export type supabaseUploadImage = { 
-    success: boolean, 
-    file_name?: string, 
-    url?: string, 
-    short_description?: string
-}
+    if(files.length === 0) return uploadedImages;    
 
+    for (const file of files) {
+        const buffer = await file.arrayBuffer();
+        const fileName = buildImageName(file.name);
 
-export async function uploadImage(file: File | null, dressName: string, color: string): Promise<supabaseUploadImage> {
-    if(!file || !(file instanceof File)) return { success: false, file_name: undefined, url: undefined, short_description: undefined }
+        const { data, error } = await uploadFileToSupabaseStorage(fileName, buffer, file.type, 'NeliayCollection');
 
-    const buffer = await file.arrayBuffer();
-    const fileName = buildImageName(file.name);
+        if (error || !data) continue;
 
-    const { data, error } = await uploadFileToSupabaseStorage(fileName, buffer, file.type, 'NeliayCollection');
-
-    if (error || !data  ) return { success: false, file_name: undefined, url: undefined, short_description: undefined }
-
-    const urlData = getPublicUrlSupabase(fileName, 'NeliayCollection');
-    
-    return {
-        success: true,
-        file_name: fileName,
-        url: urlData.publicUrl ?? file.name,
-        short_description: buildSlug(dressName, color)
+        uploadedImages.push({
+            success: true,
+            file_name: fileName,
+            url: getPublicUrlSupabase(fileName, 'NeliayCollection').publicUrl ?? file.name,
+            short_description: buildSlug(dressName, color)
+        });
     }
+
+    return uploadedImages;
 }
+
+export async function deleteImageFromSupabaseStorage(fileName: string, storageName: string): Promise<boolean> {
+    const { data, error } = await supabase.storage.from(storageName).remove([fileName]);
+
+    if (error || !data) {
+        console.error('Error deleting image from Supabase Storage:', error);
+        return false;
+    }
+
+    return true;
+}
+
+    
+
+    

@@ -1,20 +1,17 @@
-import { db } from '$lib/server/index.js';
-import { json } from '@sveltejs/kit';
-import { size } from '$lib/server/db/schema.js';
-import type { RequestHandler } from './$types';
-import { console } from 'inspector';
-import type { SizeDto } from '$lib/server/types/Dto';
 import { asc } from 'drizzle-orm';
+import { json } from '@sveltejs/kit';
+import { db } from '$lib/server/index.js';
+import type { RequestHandler } from './$types';
+import { size } from '$lib/server/db/schema.js';
+import { sizeInsertSchema } from '$lib/server/types/models';
+import z from 'zod';
 
 
 export const GET: RequestHandler = async () => {
 	try {
-		const sizes = await db.select({
-			id: size.id,
-			size: size.size,
-			height: size.height,
-		}).from(size)
-		  .orderBy( asc(size.id) )
+		const sizes = await db.select()
+							  .from(size)
+							  .orderBy( asc(size.id) );
 		
 		return json( sizes , { status: 200 });
 		
@@ -31,11 +28,18 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			return json({ message: 'Unauthorized'}, { status: 401 });
 		}
 
-		const data: SizeDto = await request.json();
+		const response = await request.json();
+		const data_validated = await sizeInsertSchema.safeParseAsync(response);
+
+		if(!data_validated.success){
+			return json({
+				errors: z.flattenError(data_validated.error).fieldErrors
+			});
+		}
 		
 		const insertedSize = await db.insert(size).values({
-			size: data.size,
-			height: data.height
+			size: data_validated.data.size,
+			height: data_validated.data.height
 		}).returning({ id: size.id, size: size.size, height: size.height });
 		
 		return json( insertedSize , { status: 201 });
