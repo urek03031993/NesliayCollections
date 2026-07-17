@@ -1,3 +1,4 @@
+import type { Rental } from '$lib/components/AviabilityCalendar/interfaces';
 import type {	SizeType, 
 				ProductCategory, 
 				// RentalStatus,
@@ -78,6 +79,7 @@ export interface ProductWithSizesInfo {
 	category: ProductCategory;
 	sizes: ProductSizesInfo[];
 	images: ProductImageInfo[];
+	rentals: Rental[];
 }
 
 

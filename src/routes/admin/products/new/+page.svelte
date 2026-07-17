@@ -1,14 +1,18 @@
 <script lang="ts">
-	import type { PageProps } from "./$types";  
-	import { goto } from "$app/navigation";
+	import z from "zod";
+	import { v4 } from "uuid";
 	import { resolve } from "$app/paths";
-	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";	
-	import Modal from "$lib/components/Modal/Modal.svelte";
-	import ProductImageUpload from "$lib/components/ProductImageUpload/ProductImageUpload.svelte";
+	import { goto } from "$app/navigation";
+	import type { PageProps } from "./$types";  
+	import { onDestroy, onMount } from "svelte";
 	import { toastStore } from "$lib/stores/store";
-
+	import { sizeFormSchemaZod } from "$lib/zod/schema";
+	import Modal from "$lib/components/Modal/Modal.svelte";
+	import AdminSidebar from "$lib/components/AdminSidebar/AdminSidebar.svelte";	
+    import type { newImagesPreviewList, sizeParseErrors } from "$lib/zod/interfaces";
+	import ProductImageThumbCard from "$lib/components/ProductGalery/ProductImageThumbCard.svelte";
     
-    let { data, form }: PageProps = $props();
+    let { data, form }: PageProps = $props();    
 
     $effect.pre(()=>{
         if(form?.success) {
@@ -21,21 +25,31 @@
         }
     });
 
-
+    let activo = $state(true);
     let openModal = $state(false);
-    let sizesList = $state<{ size_id: number, size: string; price: number; quantity: number }[]>([]);
-	let jsonSizes: string = $derived(JSON.stringify(sizesList))
+    let sizesList = $state<{ size_id: number, size: string, price: string, quantity: number }[]>([]);
+	let jsonSizes: string = $derived(JSON.stringify(sizesList));
+    let addSizeError = $state<sizeParseErrors>();
 	
 	function addSize(event: Event): void {
 		event.preventDefault();
         const formData = new FormData(event.target as HTMLFormElement);
+        const body = Object.fromEntries(formData.entries());        
 
-        const size_id = parseInt(formData.get('size_id') as string, 10);
-        const size = data.sizes.find((s) => s.id === size_id)?.size || '';
-        const price = parseFloat(formData.get('price') as string);
-        const quantity = parseInt(formData.get('quantity') as string, 10);
+        const sizeValidation = sizeFormSchemaZod.safeParse(body);
 
-        const newSize = { size_id: size_id, size: size, price: price, quantity: quantity };
+         if (!sizeValidation.success) {
+            addSizeError = z.flattenError(sizeValidation.error).fieldErrors;
+            return;
+         }
+
+        const newSize = { 
+            size_id: sizeValidation.data.size_id, 
+            size: data.sizes.find((s) => s.id === sizeValidation.data.size_id)?.size ?? '', 
+            price: sizeValidation.data.price, 
+            quantity: sizeValidation.data.quantity 
+        };
+
         sizesList = [...sizesList, newSize];
         openModal = false;
 	}
@@ -43,14 +57,78 @@
 	function removeSize( index: number ): void {
     	sizesList = sizesList.filter((_, i) => i !== index);
   	}
+
+
+    let dataTranfer = $state<DataTransfer>();
+    let files = $derived(dataTranfer?.files);
+    let currentFileIndex = $state<number>();
+    let newFiles = <newImagesPreviewList[]>$state([]);
+    let fileInput = $state<HTMLInputElement>();
+    
+    onMount(()=>{
+        if(!dataTranfer) dataTranfer = new DataTransfer();
+    });
+
+    onDestroy(()=>{
+        newFiles.forEach((file) => URL.revokeObjectURL(file.urlPreview));
+    });
+
+    function addImage() {
+        const file = fileInput?.files;
+
+        if (!file) return;
+
+        if (file) {            
+            dataTranfer = new DataTransfer();
+            newFiles = [...newFiles, {
+                uuid: v4(),
+                file: file[0],
+                urlPreview: URL.createObjectURL(file[0]),
+            }]
+
+            currentFileIndex = newFiles.length - 1;
+
+            newFiles.forEach((file)=>{
+                if(file.file) dataTranfer?.items.add(file.file);                
+            });             
+        } else {
+            currentFileIndex = undefined;
+        }
+    }
+
+    function openFileInput(): void {
+        if(fileInput) fileInput.click();
+	};
+
+    function previousImage(): void {
+        if(currentFileIndex === 0 || currentFileIndex === undefined) return;
+
+        if(currentFileIndex > 0){
+            currentFileIndex -= 1;
+        }
+
+    };
+
+    function nextImage(): void {
+        if(currentFileIndex === undefined) currentFileIndex = 0;
+
+        if(currentFileIndex < newFiles.length - 1){
+            currentFileIndex += 1;
+        }else{
+            return;
+        }
+
+    };
+
+    function deleteImage(uuid: string): void {        
+        currentFileIndex = undefined;
+        newFiles = newFiles.filter((file)=> file.uuid !== uuid);
+        if (newFiles.length === 0) return;
+        currentFileIndex = 0;
+    }
 </script>
 
 <AdminSidebar/>
-
-
-{#if form?.errors }    
-    <p>{ form?.errors }</p>    
-{/if}
 
 <main class="pt-24 lg:pl-72 pb-20 px-6 lg:px-12 min-h-screen">
     <div class="max-w-5xl mx-auto">
@@ -77,49 +155,128 @@
             </div>
 
             <div class="space-y-8 md:col-span-7">
+                <div class="space-y-6">
+                    <div class="relative group aspect-4/5 w-full bg-surface-container-low rounded-2xl overflow-hidden shadow-[0_12px_40px_rgba(115,92,0,0.06)] border border-outline-variant/20 transition-all duration-500">
+                        <div class="absolute inset-0 flex items-center justify-center bg-[#fdfaf5]">
+                            {#if currentFileIndex === undefined}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="112" height="112" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-icon lucide-image text-surface-container select-none"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                            {:else }
+                                <img src={newFiles[currentFileIndex].urlPreview} alt="" class="w-full h-full object-cover">                
+                            {/if}  
 
-                <ProductImageUpload errors={typeof(form?.errors) !== "string" && form?.errors?.file ? form?.errors?.file : undefined}/>
+                            {#if currentFileIndex !== undefined && currentFileIndex > 0 && newFiles.length > 1 }
+                                <button class="absolute left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 backdrop-blur-md text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm" 
+                                        type="button" 
+                                        aria-label="leftCarrouselImage"
+                                        onclick={()=> previousImage()}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left-icon lucide-chevron-left text-xl"><path d="m15 18-6-6 6-6"/></svg>
+                                </button>                
+                            {/if}
 
-                <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">                    
-                    <input id="jsonSizes" bind:value={ jsonSizes } type="hidden" name="jsonSizes"/>                    
-                    <table class="w-full border-collapse text-left">
-                        <thead>
-                            <tr class="border-outline-variant/10 border-b">
-                                <th class="text-on-surface-variant uppercase font-manrope text-xs font-bold pb-2.5">Size</th>
-                                <th class="text-on-surface-variant uppercase font-manrope text-xs font-bold pb-2.5">Rental Price (USD)</th>
-                                <th class="text-on-surface-variant uppercase font-manrope text-xs font-bold pb-2.5">Quantity</th>
-                                <th class="text-on-surface-variant uppercase font-manrope text-xs font-bold pb-2.5">Delete</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {#each sizesList as size, index (index)}
-                                <tr>
-                                    <td class="">{ size.size }</td>
-                                    <td class="">{ size.price }</td>
-                                    <td class="">{ size.quantity }</td>
-                                    <td class="">
-                                        <button type="button" aria-label="delete size" onclick={() => removeSize(index)}>
-                                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                                        </button>                                        
-                                    </td>
-                                </tr>                                
-                            {/each }
-                            <tr>
-                                <td colspan="4">
-                                    <button class="flex gap-1.5 text-ms items-center text-on-surface-variant uppercase font-manrope text-xs font-bold pb-2.5" onclick={() => openModal = true} type="button" >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-plus-icon lucide-circle-plus"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
-                                        Add New Size
-                                    </button>                                    
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                            {#if currentFileIndex !== undefined && currentFileIndex < (newFiles.length - 1)}
+                                <button class="absolute right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/80 backdrop-blur-md text-primary opacity-0 group-hover:opacity-100 transition-all duration-300 hover:bg-white shadow-sm" 
+                                        type="button" 
+                                        aria-label="rightCarrouselImage"
+                                        onclick={()=> nextImage()}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-right-icon lucide-chevron-right text-xl"><path d="m9 18 6-6-6-6"/></svg>
+                                </button>                
+                            {/if}
+                        </div>
+                        <div class="absolute bottom-0 left-0 right-0 p-6 bg-linear-to-t from-primary/20 to-transparent pointer-events-none">
+                            <span class="text-white text-xs font-manrope font-bold uppercase tracking-widest opacity-80">Pre - View</span>
+                        </div>
+                    </div>
+                    
+                    <div class="relative group/thumb">
+                        <div class="relative">                            
+                            <div class="flex items-center gap-4 overflow-x-auto py-3 px-2 no-scrollbar scroll-smooth">
+                                {#each newFiles as image(image.uuid) }
+                                    <ProductImageThumbCard type="inactive" imgSrc={image.urlPreview} deleteImg={deleteImage} uuid={image.uuid}/>
+                                {/each}
+
+                                <input  type="file"
+                                        accept="image/*"
+                                        onchange={ addImage }
+                                        hidden
+                                        bind:this={ fileInput }
+                                        />
+
+                                <input type="file"
+                                        accept="image/*"
+                                        name="images"
+                                        multiple
+                                        hidden
+                                        bind:files={ files }
+                                        />
+
+                                {#if newFiles.length < 5}
+                                    <button class="shrink-0 w-24 aspect-4/5 rounded-lg group cursor-pointer border-2 border-dashed border-outline-variant/40 hover:border-primary/60 hover:bg-primary/5 flex flex-col items-center justify-center gap-2 transition-all"
+                                            type="button"
+                                            onclick={()=>{ openFileInput()}}>                    
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-image-plus-icon lucide-image-plus text-primary group-hover:scale-110 transition-transform"><path d="M16 5h6"/><path d="M19 2v6"/><path d="M21 11.5V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7.5"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/><circle cx="9" cy="9" r="2"/></svg>
+                                        <span class="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant group-hover:text-primary">Add Image</span>
+                                    </button>
+                                {/if}                                
+                            </div>
+                            <div class="absolute right-0 top-0 bottom-0 w-8 bg-linear-to-l from-background to-transparent z-10 pointer-events-none opacity-0 group-hover/thumb:opacity-100 transition-opacity"></div>
+                        </div>
+                    </div>
+                </div>                
+
+                <div class="bg-surface-container-lowest p-8 rounded-xl shadow-[0_8px_32px_rgba(28,28,24,0.04)] space-y-6">
+                    <input id="jsonSizes" bind:value={ jsonSizes } type="hidden" name="jsonSizes"/>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="block text-xs font-bold uppercase tracking-widest text-on-surface-variant font-manrope">Inventory Management</h2>
+                    </div>
                     {#if typeof(form?.errors) !== "string" && form?.errors?.sizes}    
                         <p class="text-red-600">{ form?.errors?.sizes[0] }</p>
                     {/if}
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-separate border-spacing-y-3">
+                            <thead>
+                                <tr class="text-[10px] uppercase tracking-widest text-outline font-bold">
+                                    <th class="pb-2 pl-2">Size</th>
+                                    <th class="pb-2">Price (USD)</th>
+                                    <th class="pb-2">Stock</th>
+                                    <th class="pb-2 text-right pr-2">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="font-manrope">
+                                {#each sizesList as size, index (index)}
+                                    <tr class="group">
+                                        <td class="bg-surface-container-low rounded-l-lg p-3">
+                                            { size.size }
+                                        </td>
+                                        <td class="bg-surface-container-low p-3">
+                                            <div class="relative">
+                                                <span class="absolute left-0 top-1/2 -translate-y-1/2 text-primary/40 text-xs">$</span>
+                                                { size.price }
+                                            </div>
+                                        </td>
+                                        <td class="bg-surface-container-low p-3">
+                                            { size.quantity }
+                                        </td>
+                                        <td class="bg-surface-container-low rounded-r-lg p-3 text-right">
+                                            <button class="text-outline-variant hover:text-error transition-colors" 
+                                                    type="button" 
+                                                    aria-label="delete_size"
+                                                    onclick={() => removeSize(index)}>
+                                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                {/each}                                
+                            </tbody>
+                        </table>
+                    </div>
+                    <button class="w-full mt-2 flex items-center justify-center gap-2 py-3 border-2 border-dashed border-outline-variant/40 rounded-lg text-on-surface-variant hover:border-primary/60 hover:bg-primary/5 transition-all group" 
+                            type="button"
+                            onclick={() => openModal = true}>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus text-primary group-hover:scale-110 transition-transform"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+                        <span class="text-xs font-bold uppercase tracking-widest">Add Size</span>
+                    </button>
                 </div>
             </div>
-
 
             <div class="space-y-8 md:col-span-5">      
                 <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
@@ -145,7 +302,6 @@
                     </div>
                 </div>
 
-
                 <div class="bg-surface-container-lowest space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
                     <div class="space-y-2">
                         <label for="description" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
@@ -159,26 +315,39 @@
                          {#if typeof(form?.errors) !== "string" && form?.errors?.description}    
                             <p class="text-red-600">{ form?.errors?.description[0] }</p>
                         {/if}
-                    </div>
-                    
+                    </div>                    
                 </div>
 
                 <div class="bg-surface-container-lowest space-y-4 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]">
                     <label for="" class="text-on-surface-variant font-manrope mb-2 block text-xs font-bold tracking-widest uppercase">
                         Archived properties
                     </label>
-                    <div class="space-y-3">
-                        <label class="group flex cursor-pointer items-center">
-                            <div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
-                                <input class="peer absolute h-full w-full cursor-pointer opacity-0" type="checkbox" name="activo" />
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-icon lucide-check text-primary scale-0 text-xs transition-transform peer-checked:scale-100"><path d="M20 6 9 17l-5-5"/></svg>                                
-                            </div>
-                            <span class="font-body text-on-surface ml-3 text-sm">Active</span>
-                        </label>
-                        {#if typeof(form?.errors) !== "string" && form?.errors?.activo}    
+                    <label class="relative inline-flex items-center cursor-pointer group">
+                        <input type="checkbox" class="sr-only peer" name="activo" bind:checked={activo}>
+                        <div class="w-10 h-5 bg-secondary-container peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer 
+                                    transition-all duration-300 ease-in-out
+                                    peer-checked:bg-primary
+                                    group-hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+                        </div>
+                        <div class="absolute left-0.5 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-all duration-300 ease-in-out
+                                    peer-checked:translate-x-4.5 peer-checked:scale-110
+                                    flex items-center justify-center">
+                            {#if activo}
+                                <svg class="w-3 h-3 text-slate-400 peer-checked:text-blue-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            {:else}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x w-3 h-3 text-slate-400 peer-checked:text-blue-500 transition-colors duration-300">
+                                    <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+                                </svg>											
+                            {/if}
+                            
+                        </div>
+                        <span class="ml-3 text-black">Activo</span>
+                    </label>
+                    {#if typeof(form?.errors) !== "string" && form?.errors?.activo}    
                         <p class="text-red-600">{ form?.errors?.activo[0] }</p>
-                    {/if}			
-                    </div>
+                    {/if}
                 </div>
 
                 <div class="flex flex-col gap-4 pt-4">
@@ -195,17 +364,15 @@
     </div>
 </main>
 
-
-
-
-
-
 <Modal  open={ openModal }>
     <form class="space-y-6 rounded-xl p-8 shadow-[0_8px_32px_rgba(28,28,24,0.04)]" onsubmit = { addSize }>
         <div class="space-y-2">
             <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                 Size
             </label>
+            {#if addSizeError?.size_id}    
+                <p class="text-red-600">{ addSizeError.size_id }</p>
+            {/if}
             <select class="bg-surface-container-low focus:ring-primary/20 font-body w-full rounded-lg border-none p-4 transition-all focus:ring-2"
                     id="size" name="size_id">
                 {#each data.sizes as size(size.id)}
@@ -218,12 +385,15 @@
             <label for="" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                 Rental Price (USD)
             </label>
+            {#if addSizeError?.price}    
+                <p class="text-red-600">{ addSizeError.price }</p>
+            {/if}
             <div class="relative">
                 <span class="text-primary absolute top-1/2 left-4 -translate-y-1/2 font-bold">$</span>
                 <input
                     class="bg-surface-container-low focus:ring-primary/20 font-body w-full rounded-lg border-none p-4 pl-8 transition-all focus:ring-2"
                     placeholder="0.00"
-                    type="number" name="price" id="price" required
+                    type="number" name="price" id="price" required min="0" step="0.01"
                 />
             </div>
         </div>
@@ -232,6 +402,9 @@
             <label for="quantity" class="text-on-surface-variant font-manrope block text-xs font-bold tracking-widest uppercase">
                 Quantity
             </label>
+            {#if addSizeError?.quantity}    
+                <p class="text-red-600">{ addSizeError.quantity }</p>
+            {/if}
             <input class="bg-surface-container-low focus:ring-primary/20 font-body w-full rounded-lg border-none p-4 pl-8 transition-all focus:ring-2"
                     type="number" name="quantity" id="quantity" placeholder="3" required />
         </div>

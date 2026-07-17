@@ -4,6 +4,8 @@ import { image, product, product_size } from '$lib/server/db/schema.js';
 import type { RequestHandler } from './$types';
 import { Categories } from '$lib/interfaces';
 import { sql } from 'drizzle-orm/sql/sql';
+import { productApiSchemaZod } from '$lib/zod/schema';
+import z from 'zod';
 
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -33,7 +35,6 @@ export const GET: RequestHandler = async ({ url }) => {
 					columns:{
 						url: true
 					},
-					limit: 1,
 				}
 
 			}
@@ -52,19 +53,24 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
 		if (!cookies.get('session')) {
 			return json({ error: 'Unauthorized' }, { status: 401 });
-		} 
+		}
 		
 		const data = await request.json();
+		const data_validated = await productApiSchemaZod.safeParseAsync(data);
+
+		if (!data_validated.success) {
+			return json({ errors: z.flattenError(data_validated.error).fieldErrors }, { status: 400 });
+		}
 
 		const transactionResult = await db.transaction(
 			async(tx) => {
 
 				const insertedProduct = await tx.insert(product).values({
-					name: data.name,
-					description: data.description,				
-					color: data.color,
-					category: data.category,
-					activo: true,
+					name: data_validated.data.name,
+					description: data_validated.data.description,				
+					color: data_validated.data.color,
+					category: data_validated.data.category,
+					activo: data_validated.data.activo,
 				}).returning();
 
 				if(!insertedProduct){
@@ -72,7 +78,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 				}
 
 				const insertedProductSize = await tx.insert(product_size).values(
-					data.sizes.map((size: { size_id: number, size: string; price: number; quantity: number }) =>	({
+					data_validated.data.sizes.map((size) =>	({
 						product_id: insertedProduct[0].id,
 						size_id: size.size_id,
 						price: size.price,               
@@ -83,12 +89,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 					throw new Error('Failed to link product with his size')
 				}
 
-				const insertedProductImage = await tx.insert(image).values({
-					product_id: insertedProduct[0].id,
-					url: data.url,
-					file_name: data.file_name,               
-					short_description: data.short_description,
-				}).returning();
+				const insertedProductImage = await tx.insert(image).values(
+					data_validated.data.imagesData.map((image) => ({
+						product_id: insertedProduct[0].id,
+						url: image.url,
+						file_name: image.file_name,               
+						short_description: image.short_description,
+					}))).returning();
 
 				if(!insertedProductImage){
 					throw new Error('Failed to upload the image for the product')
@@ -104,4 +111,4 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		console.error('Error creating product:', error);
 		return json({ message: 'Failed to create product' }, { status: 500 });
 	}
-}
+};

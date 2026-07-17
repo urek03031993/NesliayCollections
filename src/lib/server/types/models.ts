@@ -1,4 +1,5 @@
 import type { InferSelectModel, InferInsertModel } from 'drizzle-orm';
+import { createInsertSchema, createUpdateSchema } from 'drizzle-zod';
 
 import {
 	user,
@@ -10,6 +11,7 @@ import {
 	rental,
 	payment_orders,
 	rental_items,
+	configuration,
 	// categorie,
 	// rental_items,
 	// reservations_calendar,
@@ -32,7 +34,7 @@ export type RentalStatus = 'draft' | 'prebook' | 'reserved' | 'cancelled';
 
 
 // ==========================================
-// MODELOS BASE (SELECT)
+// TYPES BASE (SELECT)
 // ==========================================
 export type Size = InferSelectModel<typeof size>;
 export type User = InferSelectModel<typeof user>;
@@ -43,13 +45,13 @@ export type Rental = InferSelectModel<typeof rental>;
 export type RentalItem = InferSelectModel<typeof rental_items>;
 export type Client = InferSelectModel<typeof client>;
 export type PaymentOrder = InferSelectModel<typeof payment_orders>;
+export type Configuration = InferSelectModel<typeof configuration>;
 // export type ReservationsCalendar = InferSelectModel<typeof reservations_calendar>;
 // export type RentalHistory = InferSelectModel<typeof rental_history>;
-// export type Configuration = InferSelectModel<typeof configuration>;
 
 
 // ==========================================
-// MODELOS PARA INSERT (NEW)
+// TYPES PARA INSERT (NEW)
 // ==========================================
 export type NewSize = InferInsertModel<typeof size>;
 export type NewUser = InferInsertModel<typeof user>;
@@ -59,10 +61,31 @@ export type NewProductSize = InferInsertModel<typeof product_size>;
 export type NewRental = InferInsertModel<typeof rental>;
 export type NewClient = InferInsertModel<typeof client>;
 export type NewPaymentOrder = InferInsertModel<typeof payment_orders>;
+export type NewConfiguration = InferInsertModel<typeof configuration>;
 // export type NewRentalItem = InferInsertModel<typeof rental_items>;
 // export type NewReservationsCalendar = InferInsertModel<typeof reservations_calendar>;
 // export type NewRentalHistory = InferInsertModel<typeof rental_history>;
-// export type NewConfiguration = InferInsertModel<typeof configuration>;
+
+
+
+// ==========================================
+// MODELOS PARA INSERT ZOD
+// ==========================================
+
+export const sizeInsertSchema = createInsertSchema(size);
+export const sizeUpdateSchema = createUpdateSchema(size);
+
+
+export const productInsertSchema = createInsertSchema(size);
+// export const sizeUpdateSchema = createUpdateSchema(size);
+
+export const configurationInsertSchema = createInsertSchema(configuration);
+export const configurationUpdateSchema = createUpdateSchema(configuration);
+
+
+
+
+
 
 
 // ==========================================

@@ -1,4 +1,15 @@
 import { fail, type Actions } from "@sveltejs/kit";
+import type { PageServerLoad } from "./$types";
+import type { Configuration } from "$lib/server/types/models";
+
+
+export const load: PageServerLoad = async({ fetch }) => {
+    const response = await fetch('/api/configuration?key=delivery&key=tax');
+
+    const configurations: Configuration[] = await response.json();
+    return { configurations: configurations }
+};
+
 
 export const actions  = {
     default: async ({ request, fetch }) => {

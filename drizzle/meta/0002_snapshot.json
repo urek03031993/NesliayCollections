@@ -1,6 +1,6 @@
 {
-  "id": "7389f946-a1e7-4c7d-ae4e-aeeaefb66695",
-  "prevId": "a0f2ea81-c1f9-499a-8453-ee9d7512b2e5",
+  "id": "bfe1c03e-52bd-4db7-afce-a742119d4e20",
+  "prevId": "7389f946-a1e7-4c7d-ae4e-aeeaefb66695",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -308,15 +308,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "payment_orders_order_id_unique": {
-          "name": "payment_orders_order_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "order_id"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

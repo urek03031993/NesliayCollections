@@ -175,3 +175,17 @@ function ToastStore() {
 export const toastStore = ToastStore();
 export const toasts = derived(toastStore, ($toasts) => $toasts);
 
+
+function createLoadingStore() {
+    const { subscribe, set, update } = writable(false);
+
+    return {
+        subscribe,
+        start: () => update(() => true),
+        stop: () => update(() => false),
+        reset: () => set(false),        
+    };
+}
+
+export const loading = createLoadingStore();
+

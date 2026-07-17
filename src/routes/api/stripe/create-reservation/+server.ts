@@ -21,12 +21,14 @@ interface paymentIntentRequest {
     phone: string;
     document_type: string;
     identification_document: string;
+    deliveryAmount: number;
+    taxPercent: number;
 }
 
 
 export const POST: RequestHandler = async ({ request }) => {
     try {
-        const {  startDate, endDate, basePrice, orderItems, termsAccepted, 
+        const {  startDate, endDate, basePrice, orderItems, termsAccepted, deliveryAmount, taxPercent,
                  email, name, last_name, phone, document_type, identification_document }: paymentIntentRequest = await request.json();
 
         if (!termsAccepted) error(400, 'You must accept the terms and conditions');
@@ -34,7 +36,7 @@ export const POST: RequestHandler = async ({ request }) => {
 
         let customer;
         const rentalId = uuidv4();
-        const amounts = computeRentalAmounts(basePrice);
+        const amounts = computeRentalAmounts(basePrice, deliveryAmount, taxPercent);
         const customerExist = await stripeConnection.customers.list({ email: email, limit: 1 });
 
 
@@ -51,10 +53,12 @@ export const POST: RequestHandler = async ({ request }) => {
                     terms_date: new Date().toISOString()
                 }
             });
-        }        
+        }
+
+        console.log('amounts', amounts);
 
         const paymentIntent = await stripeConnection.paymentIntents.create({
-            amount: amounts.totalWithTax * 100,
+            amount: (amounts.totalWithTax + amounts.delivery) * 100,
             currency: 'usd',
             customer: customer.id,
             metadata: {
@@ -63,9 +67,10 @@ export const POST: RequestHandler = async ({ request }) => {
                 order_type: 'reservation',               
                 base_price: amounts.basePrice * 100,
                 tax_amount: amounts.tax * 100,
+                delivery_amount: amounts.delivery * 100,
                 terms_accepted: termsAccepted.toString()
             },
-            description: `Sign for rental dress ${rentalId} - $${amounts.totalWithTax}`
+            description: `Sign for rental dress ${rentalId} - $${amounts.totalWithTax} + $${amounts.delivery} delivery`
         });
 
         if (!paymentIntent) {
@@ -106,6 +111,7 @@ export const POST: RequestHandler = async ({ request }) => {
                 end_date: new Date(endDate).toISOString(),
                 subtotal: amounts.basePrice.toString(),
                 tax_amount: amounts.tax.toString(),
+                tax_percent: taxPercent.toString(),
                 total: amounts.totalWithTax.toString(),
                 state: 'draft',
             }).returning();

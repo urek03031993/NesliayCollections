@@ -1,6 +1,6 @@
 {
-  "id": "7389f946-a1e7-4c7d-ae4e-aeeaefb66695",
-  "prevId": "a0f2ea81-c1f9-499a-8453-ee9d7512b2e5",
+  "id": "24a9c359-5759-45d1-86e1-e5ebaf5c308d",
+  "prevId": "bfe1c03e-52bd-4db7-afce-a742119d4e20",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -107,6 +107,52 @@
           "nullsNotDistinct": false,
           "columns": [
             "identification_document"
+          ]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.configuration": {
+      "name": "configuration",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "value": {
+          "name": "value",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "configuration_key_unique": {
+          "name": "configuration_key_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "key"
           ]
         }
       },
@@ -308,15 +354,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "payment_orders_order_id_unique": {
-          "name": "payment_orders_order_id_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "order_id"
-          ]
-        }
-      },
+      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false

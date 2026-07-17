@@ -6,15 +6,25 @@
 	import Header from '$lib/components/Header/Header.svelte';
 	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';	
 	import StripePaymentsForm from '$lib/components/forms/StripePaymentForm/StripePaymentsForm.svelte';
+	import type { PageProps } from './$types';
 
+	let { data }: PageProps = $props();
 
 	let showModal: boolean = $state(false);
 	let cartItems: string = $derived(JSON.stringify($cart));
 	let startDate = $state<Date>();
 	let endDate = $state<Date>();
 	let rentalAgreement: boolean = $state(false);
+	let delivery: boolean = $state(false);
+	let deliveryAmount: number = $derived.by(() => {
+		if (!delivery) return 0;
+		
+		return  parseFloat(data.configurations.find((c: { key: string }) => c.key === 'delivery')?.value ?? '0'); 
+	});
+	let taxPercent: number = $derived(parseFloat(data.configurations.find((c: { key: string }) => c.key === 'tax')?.value ?? '0.00') );
 	let action = <'pre_book' | 'reserve'>$state();
 
+	
 	let validRentalDays = $derived.by(() => {		
 		if (!startDate || !endDate) return false;
 
@@ -97,17 +107,49 @@
 
 								<div class="text-on-surface-variant flex justify-between">
 									<span class="text-sm">Estimated Taxes</span>
-									<span class="font-manrope font-medium">${ Math.round($cartTotal * 0.07 * 100) / 100 }</span>
+									<span class="font-manrope font-medium">${ Math.round($cartTotal * (taxPercent > 0 ? taxPercent : 1)) / 100 }</span>
 								</div>
+
+								{#if delivery}
+									<div class="text-on-surface-variant flex justify-between">
+										<span class="text-sm">Delivery</span>
+										<span class="font-manrope font-medium">${ deliveryAmount }</span>
+									</div>									
+								{/if}
+
+								
 							</div>
 							<div class="border-outline-variant/15 mb-8 flex items-baseline justify-between border-t pt-6">
 								<span class="font-notoSerif text-on-surface text-xl">Total</span>
-								<span class="font-notoSerif text-primary text-4xl">${$cartTotal + Math.round($cartTotal * 0.07 * 100) / 100}</span>
+								<span class="font-notoSerif text-primary text-4xl">${$cartTotal + deliveryAmount + Math.round($cartTotal * (taxPercent > 0 ? taxPercent : 1)) / 100}</span>
 							</div>
 						
 							<input id="cartItems" bind:value={ cartItems } type="hidden" name="cartItems"/>	
 
-							 <div class="space-y-1 mb-8">
+							<div class="space-y-3 mb-8">
+								<label class="relative inline-flex items-center cursor-pointer group">
+									<input type="checkbox" class="sr-only peer" bind:checked={ delivery } name="delivery">
+									<div class="w-10 h-5 bg-secondary-container peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/30 rounded-full peer 
+												transition-all duration-300 ease-in-out
+												peer-checked:bg-primary
+												group-hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]">
+									</div>
+									<div class="absolute left-0.5 top-1 bg-white w-4 h-4 rounded-full shadow-md transition-all duration-300 ease-in-out
+												peer-checked:translate-x-4.5 peer-checked:scale-110
+												flex items-center justify-center">
+										{#if delivery}
+											<svg class="w-3 h-3 text-slate-400 peer-checked:text-blue-500 transition-colors duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+											</svg>
+										{:else}
+											<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x-icon lucide-x w-3 h-3 text-slate-400 peer-checked:text-blue-500 transition-colors duration-300">
+												<path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+											</svg>											
+										{/if}
+										
+									</div>
+									<span class="ml-3 text-black">Delivery</span>
+								</label>							 	
 								<label class="group flex cursor-pointer items-center"> 
 									<div class="border-outline group-hover:border-primary relative flex h-5 w-5 items-center justify-center rounded border transition-colors">
 										<input class="peer absolute h-full w-full cursor-pointer opacity-0" bind:checked={ rentalAgreement } type="checkbox" name="rentalAgreement"/>
@@ -187,6 +229,6 @@
 
 
 <Modal bind:open = { showModal }>
-	<StripePaymentsForm { startDate } { endDate } { rentalAgreement } { action } />
+	<StripePaymentsForm { startDate } { endDate } { rentalAgreement } { deliveryAmount } { taxPercent } { action } />
 </Modal>
 

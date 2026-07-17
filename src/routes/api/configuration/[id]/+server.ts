@@ -2,9 +2,9 @@ import z from 'zod';
 import { eq } from 'drizzle-orm';
 import { json } from '@sveltejs/kit';
 import { db } from '$lib/server/index.js';
-import { size } from '$lib/server/db/schema';
+import { configuration } from '$lib/server/db/schema';
 import type { RequestHandler } from './$types';
-import { sizeUpdateSchema } from '$lib/server/types/models';
+import { configurationUpdateSchema } from '$lib/server/types/models';
 
 
 export const GET: RequestHandler = async ({ params }) => {
@@ -15,17 +15,17 @@ export const GET: RequestHandler = async ({ params }) => {
 			return json({ message: 'invalid ID '}, { status: 400 });
 		}
 
-		const result = await db.query.size.findFirst({ where: eq(size.id, id) });
+		const result = await db.query.configuration.findFirst({ where: eq(configuration.id, id) });
 
 		if (!result) {
-			return json({ message: 'Size not found'}, { status: 404 });
+			return json({ message: 'Configuration not found'}, { status: 404 });
 		}
 		
 		return json(result , { status: 200 });				
 		
 	}catch (error) {
-		console.error('Error fetching size:', error);
-		return json({ message: 'Failed to fetch size' }, { status: 500 });
+		console.error('Error fetching configuration:', error);
+		return json({ message: 'Failed to fetch configuration' }, { status: 500 });
 	}
 };
 
@@ -43,7 +43,7 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 		}
 
 		const response = await request.json();
-		const data_validated = await sizeUpdateSchema.safeParseAsync(response);
+		const data_validated = await configurationUpdateSchema.safeParseAsync(response);
 
 		if(!data_validated.success){
 			return json({
@@ -51,26 +51,26 @@ export const PUT: RequestHandler = async ({ request, params, cookies }) => {
 			});
 		}
 
-		const existing = await db.select().from(size).where(eq(size.id, id)).limit(1);
+		const existing = await db.select().from(configuration).where(eq(configuration.id, id)).limit(1);
 
 		if (existing.length === 0) {
-			return json({ message: 'Size not found' }, { status: 404 });
+			return json({ message: 'Configuration not found' }, { status: 404 });
 		}
 
-		const update = await db.update(size)
+		const update = await db.update(configuration)
 								.set(response)
-								.where( eq(size.id, id) )
-								.returning({ id: size.id, size: size.size, height: size.height });
+								.where( eq(configuration.id, id) )
+								.returning();
 		
 		if (!update) {
-			return json({ message: 'Size not found' }, { status: 404 });
+			return json({ message: 'Configuration not found' }, { status: 404 });
 		}
 
 		return json( update, { status: 200 });
 
 	} catch (error) {
-		console.error('Error updating size:', error);
-		return json({ message: 'Failed to updating size'}, { status: 500 });
+		console.error('Error updating configuration:', error);
+		return json({ message: 'Failed to updating configuration'}, { status: 500 });
 	}
 };
 
@@ -87,17 +87,16 @@ export const DELETE: RequestHandler = async ({ params, cookies }) => {
 			return json({ message: 'invalid ID '}, { status: 400 });
 		}
 
-		const existing = await db.select().from(size).where(eq(size.id, id)).limit(1);
+		const existing = await db.select().from(configuration).where(eq(configuration.id, id)).limit(1);
 
 		if (existing.length === 0) {
-			return json({ message: 'Size not found' }, { status: 404 });
+			return json({ message: 'Configuration not found' }, { status: 404 });
 		}
 
-		const result = await db.delete(size)
-								.where( eq(size.id, id) )
-								.returning({ id: size.id, size: size.size, height: size.height});
+		const result = await db.delete(configuration)
+								.where( eq(configuration.id, id) )
+								.returning();
 
-		
 		if (!result) {
 			return json({ message: 'Size not found'}, { status: 404 });
 		}

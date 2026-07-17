@@ -4,8 +4,6 @@
 
     let { totalQuantity, rentals, onDateSelect } : CalendarProps = $props();
 
-
-
 	const monthNames = [ 'January', 'February', 'March', 'April', 'May', 'June', 
 							'July', 'August', 'September', 'October', 'November', 'December' ];
 	
@@ -94,15 +92,15 @@
 		<div class="flex items-center justify-between">
 			<div>
 				<p class="text-black text-sm mt-1">
-					Stock: <span class="font-semibold">{ totalQuantity }</span> units
+					<span class="font-semibold">Stock:</span> { totalQuantity } units
 				</p>
 				<p class="text-black text-sm mt-1">
-					Current Date: <span class="font-semibold">{ 
-					currentDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }</span>
+					<span class="font-semibold">Current Date:</span> { 
+					currentDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }
 				</p>
 				<p class="text-black text-sm mt-1">
-					Selected Date: <span class="font-semibold">{ 
-					selectedDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }</span>
+					<span class="font-semibold">Selected Date:</span> { 
+					selectedDate.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' }) }
 				</p>
 			</div>
 			<div class="flex items-center gap-2">

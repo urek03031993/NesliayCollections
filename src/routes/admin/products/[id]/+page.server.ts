@@ -1,10 +1,10 @@
-import { error, fail } from "@sveltejs/kit";
-import type { Actions, PageServerLoad } from "./$types";
-import { resolve } from "$app/paths";
-import type { ProductCategory, Size } from "$lib/server/types/models";
-// import { uploadImage } from "$lib/supabase/supabase";
-import { productFormPartialSchemaZod } from "$lib/zod/schema";
 import z from "zod";
+import { resolve } from "$app/paths";
+import { error, fail } from "@sveltejs/kit";
+import { productFormSchemaZod } from "$lib/zod/schema";
+import type { Actions, PageServerLoad } from "./$types";
+import type { ProductCategory, Size } from "$lib/server/types/models";
+import { uploadImages, type supabaseUploadImage } from "$lib/supabase/supabase";
 
 
 interface ProductSizes {
@@ -19,6 +19,7 @@ interface ProductSizes {
 interface ProductImage {
     id: number;
     url: string;
+    file_name: string;
     short_description: string;
 }
 
@@ -37,7 +38,7 @@ interface Product {
 
 export const load: PageServerLoad = async({ params, fetch }) => {
     const responseProduct = await fetch(`/api/products/${params.id}`);
-    const responseSizes = await fetch(`/api/size`);        
+    const responseSizes = await fetch(`/api/size`);
 
     const product: Product = await responseProduct.json();
     const sizes: Size[] = await responseSizes.json();
@@ -65,10 +66,10 @@ export const actions = {
             category: formData.get('category')?.toString().trim() ?? '',
             activo: formData.get('activo') ? true : false,
             sizes: JSON.parse( formData.get('jsonSizes') as string ?? '' ),
-            file: formData.get('images')
+            files: formData.getAll('images')
         };
 
-        const productValidation = await productFormPartialSchemaZod.safeParseAsync(body);
+        const productValidation = await productFormSchemaZod.safeParseAsync(body);
 
         if (!productValidation.success) {
             return fail(400, {
@@ -84,25 +85,26 @@ export const actions = {
             });
         };
 
-        // let imageSrc = formData.get('imageSrc') ?? undefined;
-        // if(body.file){
+        let imageUploadedData: supabaseUploadImage[] = [];
 
-        //     const imageUploadedData = await uploadImage(file as File, body.name, body.color);
+        if (productValidation.data.files) {
 
-        //     if (!imageUploadedData.success) {
-        //         return fail(400, {
-        //             errors: 'The image could not be uploaded',
-        //             data: {
-        //                 name: formData.get('name')?.toString() ?? '',
-        //                 description: formData.get('description')?.toString() ?? '',				
-        //                 color: formData.get('color')?.toString() ?? '',
-        //                 category: formData.get('category')?.toString() ?? '',
-        //                 activo: formData.get('activo') ? true : false,
-        //                 sizes: JSON.parse( formData.get('jsonSizes') as string ?? '' ),
-        //             }
-        //         });
-        //     };
-        // }
+            imageUploadedData = await uploadImages(productValidation.data.files, body.name, body.color);
+            
+            if (imageUploadedData.length === 0) {
+                return fail(400, {
+                    errors: 'Images could not be uploaded',
+                    data: {
+                        name: productValidation.data.name,
+                        description: productValidation.data.description,				
+                        color: productValidation.data.color,
+                        category: productValidation.data.category,
+                        activo: productValidation.data.activo,
+                        sizes: productValidation.data.sizes,
+                    }
+                });
+            }
+        }
 
         const response = await fetch(resolve(`/api/products/${params.id}`), {
             method: 'PUT',
@@ -115,9 +117,7 @@ export const actions = {
                 category: formData.get('category')?.toString() ?? '',
                 activo: formData.get('activo') ? true : false,
                 sizes: JSON.parse( formData.get('jsonSizes') as string ?? '' ),
-                // url: imageUploadedData.url,
-                // file_name: imageUploadedData.file_name,
-                // short_description: imageUploadedData.short_description
+                imagesData: imageUploadedData
             })
         });
 
