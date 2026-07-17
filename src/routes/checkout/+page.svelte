@@ -6,8 +6,9 @@
 	import Header from '$lib/components/Header/Header.svelte';
 	import CartProductCard from '$lib/components/ProductCard/CartProductCard.svelte';	
 	import StripePaymentsForm from '$lib/components/forms/StripePaymentForm/StripePaymentsForm.svelte';
-	import { PUBLIC_DELIVERY_AMOUNT, PUBLIC_TAX_PERCENT_AMOUNT } from '$env/static/public';
+	import type { PageProps } from './$types';
 
+	let { data }: PageProps = $props();
 
 	let showModal: boolean = $state(false);
 	let cartItems: string = $derived(JSON.stringify($cart));
@@ -15,8 +16,12 @@
 	let endDate = $state<Date>();
 	let rentalAgreement: boolean = $state(false);
 	let delivery: boolean = $state(false);
-	let deliveryAmount: number = $state(parseFloat(PUBLIC_DELIVERY_AMOUNT) ?? 0);
-	let taxPercent: number = $state(parseFloat(PUBLIC_TAX_PERCENT_AMOUNT) ?? 10);
+	let deliveryAmount: number = $derived.by(() => {
+		if (!delivery) return 0;
+		
+		return  parseFloat(data.configurations.find((c: { key: string }) => c.key === 'delivery')?.value ?? '0'); 
+	});
+	let taxPercent: number = $derived(parseFloat(data.configurations.find((c: { key: string }) => c.key === 'tax')?.value ?? '0.00') );
 	let action = <'pre_book' | 'reserve'>$state();
 
 	
@@ -29,16 +34,6 @@
 	let validCheckout = $derived.by(() => {
 		return validRentalDays && rentalAgreement;
 	});
-
-	// let configAmounts = $derived.by(()=>{
-	// 	const configDelivery = parseFloat(PUBLIC_DELIVERY_AMOUNT) ?? 0;
-	// 	const configTax = parseFloat(PUBLIC_TAX_PERCENT_AMOUNT) ?? 1;
-
-	// 	let deliveryAmount = isNaN(configDelivery)? configDelivery : 0;
-	// 	let taxPercent = isNaN(configTax)? configTax : 1;		
-		
-	// 	return { deliveryAmount: deliveryAmount, taxPercent: taxPercent }
-	// });
 
 	function preBook() {
 		if (validCheckout) {
@@ -112,7 +107,7 @@
 
 								<div class="text-on-surface-variant flex justify-between">
 									<span class="text-sm">Estimated Taxes</span>
-									<span class="font-manrope font-medium">${ Math.round($cartTotal * taxPercent) / 100 }</span>
+									<span class="font-manrope font-medium">${ Math.round($cartTotal * (taxPercent > 0 ? taxPercent : 1)) / 100 }</span>
 								</div>
 
 								{#if delivery}
@@ -126,7 +121,7 @@
 							</div>
 							<div class="border-outline-variant/15 mb-8 flex items-baseline justify-between border-t pt-6">
 								<span class="font-notoSerif text-on-surface text-xl">Total</span>
-								<span class="font-notoSerif text-primary text-4xl">${$cartTotal + Math.round($cartTotal * taxPercent) / 100}</span>
+								<span class="font-notoSerif text-primary text-4xl">${$cartTotal + deliveryAmount + Math.round($cartTotal * (taxPercent > 0 ? taxPercent : 1)) / 100}</span>
 							</div>
 						
 							<input id="cartItems" bind:value={ cartItems } type="hidden" name="cartItems"/>	
@@ -234,6 +229,6 @@
 
 
 <Modal bind:open = { showModal }>
-	<StripePaymentsForm { startDate } { endDate } { rentalAgreement } { action } />
+	<StripePaymentsForm { startDate } { endDate } { rentalAgreement } { deliveryAmount } { taxPercent } { action } />
 </Modal>
 

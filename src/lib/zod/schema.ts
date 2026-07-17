@@ -7,6 +7,11 @@ export const sizeSchemaZod = z.object({
     height: z.enum(['child', 'adult'], { error: "Height must be either 'child' or 'adult'" }),
 });
 
+export const configurationSchemaZod = z.object({
+    key: z.string().min(1, { error: "Key must be at least 2 characters long" }).max(100, { error: "Key must be at most 100 characters long" }),
+    value: z.string().min(1, { error: "Value must be at least 2 characters long" }).max(255, { error: "Value must be at most 255 characters long" }),
+});
+
 
 
 

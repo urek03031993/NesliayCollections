@@ -138,12 +138,10 @@ export const client = pgTable('client', {
 });
 
 
-// export const configuration = pgTable('configuration', {
-//     id: serial('id').primaryKey(),
-//     key: varchar('key', { length: 50 }).notNull().unique(),
-//     value: text('value').notNull(),
-//     value_type: varchar('value_type', { length: 20 }).default('string'),
-//     description: text('description'),
-//     updatedAt: timestamp('updated_at').defaultNow(),
-// });
+export const configuration = pgTable('configuration', {
+    id: serial('id').primaryKey(),
+    key: varchar('key', { length: 50 }).notNull().unique(),
+    value: text('value').notNull(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+});
 

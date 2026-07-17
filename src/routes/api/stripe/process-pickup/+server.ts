@@ -28,7 +28,8 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         with: {
             rental:{
                 columns: {
-                        subtotal: true
+                        subtotal: true,
+                        tax_percent: true
                 }
             }
         }   
@@ -38,7 +39,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
         return json({message: 'Payment order not found for the given rental ID'}, { status: 404 });
     }
 
-    const amounts = computeRentalAmounts(parseFloat(paymentOrder.rental.subtotal));
+    const amounts = computeRentalAmounts(parseFloat(paymentOrder.rental.subtotal), 0, parseFloat(paymentOrder.rental.tax_percent ?? '0'));
 
 
     try {

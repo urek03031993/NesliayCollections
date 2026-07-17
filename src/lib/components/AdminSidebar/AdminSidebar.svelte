@@ -37,6 +37,11 @@
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-tuxedo-icon lucide-tuxedo"><path d="M10 3v2l4-2v2Z"/><path d="M18 3h1a2 2 0 0 1 1.7 3A5270.5 5270.5 0 0 0 12 21S6.8 12 3.3 6A2 2 0 0 1 5 3h1"/><path d="M12 9h.01"/><path d="M12 13h.01"/><path d="M21 5v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5"/></svg>
 			<span class="font-manrope text-sm font-medium">Rentals</span>
 		</a>
+		<a  class="flex items-center gap-3 py-3 transition-all duration-200 { urlPath.startsWith('/admin/configuration') ? activeClass  :  defaultClass }"
+			href={resolve('/admin/configuration')}>
+			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings-icon lucide-settings"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/><circle cx="12" cy="12" r="3"/></svg>
+			<span class="font-manrope text-sm font-medium">Configuration</span>
+		</a>
 		<a  class="flex items-center gap-3 py-3 transition-all duration-200 { urlPath.startsWith('/admin/newPassword') ? activeClass  :  defaultClass }"
 			href={resolve('/admin/newPassword')}>
 			<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-rotate-ccw-key-icon lucide-rotate-ccw-key"><path d="M12 7v6"/><path d="M12 9h2"/><path d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><circle cx="12" cy="15" r="2"/></svg>

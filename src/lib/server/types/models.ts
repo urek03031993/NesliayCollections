@@ -11,6 +11,7 @@ import {
 	rental,
 	payment_orders,
 	rental_items,
+	configuration,
 	// categorie,
 	// rental_items,
 	// reservations_calendar,
@@ -44,9 +45,9 @@ export type Rental = InferSelectModel<typeof rental>;
 export type RentalItem = InferSelectModel<typeof rental_items>;
 export type Client = InferSelectModel<typeof client>;
 export type PaymentOrder = InferSelectModel<typeof payment_orders>;
+export type Configuration = InferSelectModel<typeof configuration>;
 // export type ReservationsCalendar = InferSelectModel<typeof reservations_calendar>;
 // export type RentalHistory = InferSelectModel<typeof rental_history>;
-// export type Configuration = InferSelectModel<typeof configuration>;
 
 
 // ==========================================
@@ -60,10 +61,10 @@ export type NewProductSize = InferInsertModel<typeof product_size>;
 export type NewRental = InferInsertModel<typeof rental>;
 export type NewClient = InferInsertModel<typeof client>;
 export type NewPaymentOrder = InferInsertModel<typeof payment_orders>;
+export type NewConfiguration = InferInsertModel<typeof configuration>;
 // export type NewRentalItem = InferInsertModel<typeof rental_items>;
 // export type NewReservationsCalendar = InferInsertModel<typeof reservations_calendar>;
 // export type NewRentalHistory = InferInsertModel<typeof rental_history>;
-// export type NewConfiguration = InferInsertModel<typeof configuration>;
 
 
 
@@ -77,6 +78,9 @@ export const sizeUpdateSchema = createUpdateSchema(size);
 
 export const productInsertSchema = createInsertSchema(size);
 // export const sizeUpdateSchema = createUpdateSchema(size);
+
+export const configurationInsertSchema = createInsertSchema(configuration);
+export const configurationUpdateSchema = createUpdateSchema(configuration);
 
 
 

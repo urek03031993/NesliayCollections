@@ -6,7 +6,7 @@
 	import { Elements, PaymentElement } from 'svelte-stripe';
 	import { cart, cartTotal } from '$lib/stores/store';
 
-	let { startDate, endDate, rentalAgreement, action } = $props(); 
+	let { startDate, endDate, rentalAgreement, deliveryAmount, taxPercent, action } = $props(); 
 
 	let stripe = $state<Stripe | null>();
 	let clientSecret = $state<string | null>(null);
@@ -61,7 +61,9 @@
 				email: email, 
 				phone: phone,
 				document_type: document_type, 
-				identification_document: identification_document				
+				identification_document: identification_document,
+				deliveryAmount: deliveryAmount,
+				taxPercent: taxPercent
 			})
 		});
 

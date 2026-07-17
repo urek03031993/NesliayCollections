@@ -1,0 +1,1 @@
+ALTER TABLE "rental_items" ALTER COLUMN "size_size" SET DATA TYPE varchar(50);
